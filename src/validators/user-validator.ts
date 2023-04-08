@@ -1,26 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
-import { User } from '../models';
-import { ErrorMessages } from '../helpers/error-messages';
+import { LoginUserDTO } from '../models/user-model';
 
-const validate = (request: Request, response: Response, next: NextFunction) => {
-  try {
-    validationResult(request).throw();
+export function validateLoginUser(req: Request, res: Response, next: NextFunction): void {
+  const validator = LoginUserDTO.createInstance(req);
+  const errors = validator.validate();
+
+  if (errors.length) {
+    res.status(400).json(errors);
+  } else {
     next();
-  } catch (error) {
-    console.log(`error en el middlewar, checa aqui prro 
-      ${error}
-    `);
-    response.status(403).send({ errors: 'algo salio mal prro', error });
-  }
-};
-
-class Validator {
-  public validate() {
-    body('name').exists().notEmpty().withMessage(ErrorMessages.User_missing), body('password').exists().notEmpty().withMessage(ErrorMessages.Password_missing), (request: Request, response: Response, next: NextFunction) => validate(request, response, next);
   }
 }
-
-export const UserValidator = new Validator();
-
-export const validadorUsuario = [body('name').exists().notEmpty().withMessage(ErrorMessages.User_missing), body('password').exists().notEmpty().withMessage(ErrorMessages.Password_missing), (request: Request, response: Response, next: NextFunction) => validate(request, response, next)];
