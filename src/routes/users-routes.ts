@@ -1,11 +1,24 @@
 import { Router } from 'express';
-import { getAllUsers, searchUser, validateTest } from '../controllers/user-controllers';
-import { validateLoginUser } from '../validators/user-validator';
+import { BaseRouter } from '../models/router-model';
+import { UserController } from '../controllers/user-controllers';
 
-const router = Router();
+export class UserRouter {
+  protected router: Router;
+  protected controller: UserController;
 
-router.get('/', getAllUsers);
-router.get('/login', searchUser);
-router.get('/test', validateLoginUser, validateTest);
+  constructor() {
+    this.router = Router();
+    this.controller = new UserController();
+    this.initRoutes();
+  }
 
-export { router };
+  protected initRoutes(): void {
+    this.router.get('/', (req, res) => this.controller.validateTest(req, res));
+    this.router.get('/user', (req, res) => this.controller.searchUser(req, res));
+    this.router.post('/user', (req, res) => this.controller.uploadUser(req, res));
+  }
+
+  public getRouter(): Router {
+    return this.router;
+  }
+}

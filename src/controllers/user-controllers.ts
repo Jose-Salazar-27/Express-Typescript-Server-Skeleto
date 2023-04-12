@@ -8,28 +8,31 @@ export class UserController {
     this.service = new UserService();
   }
 
-  // protected async getAllUsers(req: Request, res: Response) {
-  //   const { data: users, error } = await supabase.from('Users').select('*');
+  async uploadUser(req: Request, res: Response) {
+    const { name, email, password } = req.body;
 
-  //   console.log(users);
-  //   if (error) {
-  //     return res.json({ error });
-  //   }
+    try {
+      const result = await this.service.uploadUser(name, password, email);
+      res.status(201).json({ result });
+    } catch (err) {
+      res.status(400).json({ error: err });
+    }
+  }
 
-  //   console.log(users);
-  //   res.json({ payload: 'ok' });
-  // }
+  async searchUser(req: Request, res: Response) {
+    const { name, email, password } = req.body;
+    console.log({
+      params: [name, email, password],
+    });
 
-  // protected async searchUser(req: Request, res: Response) {
-  //   const { name, email, password } = req.body;
-  //   console.log(req.body);
+    const user = await this.service.getSingleUser(email);
 
-  //   const user = await supabase.from('Users').select().textSearch('email', email);
+    if (!user?.data?.length || user.error) {
+      return res.status(400).json({ error: user.error || 'something was wrong fetching' });
+    }
 
-  //   if (!user.data?.length || user.error) {
-  //     res.status(400).json({ error: user.error || 'something was wrong fetching' });
-  //   }
-  // }
+    res.status(200).json({ payload: user });
+  }
 
   async validateTest(req: Request, res: Response) {
     try {
