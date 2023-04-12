@@ -12,6 +12,7 @@ export class Server extends ServerConfig {
   constructor() {
     super();
     this.app = express();
+    this.app.use(express.json());
     this.router = new MainRouter();
     this.port = this.getEnvVar('PORT');
     this.loadRoutes();
