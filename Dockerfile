@@ -1,7 +1,6 @@
 FROM node:16-alpine
 
-RUN npm install -g pnpm
-RUN pnpm install -g ts-node
+RUN npm install -g ts-node
 
 WORKDIR /usr/src/app
 
@@ -9,7 +8,7 @@ COPY package*.json ./
 
 COPY . .
 
-RUN pnpm install
+RUN npm install
 
 ENV PORT=8000
 
@@ -22,4 +21,4 @@ ENV SUPABASE_KEY_SERVICE_ROLE=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 
 EXPOSE 8000
 
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]
