@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon src/index.ts",
-    "start": "node dist/src/index.js",
-    "build": "tsc --project tsconfig.build.json",
+    "start": "tsc && node dist/src/index.js",
+    "build:test": "tsc --project tsconfig.build.json",
+    "build": "tsc",
     "test": "jest"
   },
   "keywords": [],
