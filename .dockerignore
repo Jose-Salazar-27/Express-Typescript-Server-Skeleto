@@ -1,0 +1,5 @@
+node_modules
+**/__test__
+dist
+pnpm-lock.yaml
+railway.yml
