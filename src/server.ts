@@ -2,6 +2,9 @@ import express, { Router } from 'express';
 import * as dotenv from 'dotenv';
 import { MainRouter } from './routes';
 import { ServerConfig } from './config/server-config';
+import cookieparser from 'cookie-parser';
+import bearerToken from 'express-bearer-token';
+import cors from 'cors';
 
 export class Server extends ServerConfig {
   public app: express.Application;
@@ -12,7 +15,10 @@ export class Server extends ServerConfig {
   constructor() {
     super();
     this.app = express();
+    this.app.use(cors());
     this.app.use(express.json());
+    this.app.use(cookieparser());
+    this.app.use(bearerToken());
     this.router = new MainRouter();
     this.port = this.getEnvVar('PORT');
     this.loadRoutes();
