@@ -1,4 +1,5 @@
 import { ServerConfig } from '../config/server-config';
+import { MessagesClasifications } from '../helpers/messages-clasifications';
 
 interface Post {
   guild_id: string;
@@ -29,6 +30,30 @@ export class DiscordServices extends ServerConfig {
     }
 
     return result;
+  }
+
+  async getPosts(role: string) {
+    if (role === MessagesClasifications.Super_Premium) {
+      console.log('executing super premium');
+      const superPremiumPost = await this.supabaseClient.from('Super Premium Messages').select('*');
+      const premiumPost = await this.supabaseClient.from('Premium Messages').select('*');
+      const freePosts = await this.supabaseClient.from('Free Messages').select('*');
+
+      return [superPremiumPost, premiumPost, freePosts];
+    }
+
+    if (role === MessagesClasifications.Premium) {
+      const premiumPost = await this.supabaseClient.from('Premium Messages').select('*');
+      const freePosts = await this.supabaseClient.from('Free Messages').select('*');
+
+      return [premiumPost, freePosts];
+    }
+
+    if (role === MessagesClasifications.Free) {
+      const freePosts = await this.supabaseClient.from('Free Messages').select('*');
+
+      return [freePosts];
+    }
   }
 
   // This will be removed once there is time to write an appropriate test
