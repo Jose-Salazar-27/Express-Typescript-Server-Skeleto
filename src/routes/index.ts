@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserRouter } from './users-routes';
 import { AuthRouter } from './auth-routes';
+import { DiscordRouter } from './discord-routes';
 
 export class MainRouter {
   protected router: Router;
@@ -13,9 +14,11 @@ export class MainRouter {
   private loadRoutes(): void {
     const userRuter = new UserRouter();
     const authRouter = new AuthRouter();
+    const discordRouter = new DiscordRouter();
 
     this.router.use('/users', userRuter.getRouter());
     this.router.use('/auth', authRouter.getRouter());
+    this.router.use('/discord', discordRouter.getRouter());
   }
 
   public getRouter(): Router {
