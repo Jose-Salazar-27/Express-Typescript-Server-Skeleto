@@ -17,6 +17,10 @@ export class AuthRouter {
   }
 
   private initRoutes(): void {
+    this.router.get('/discord', (req, res) => this.controller.discord(req, res));
+    this.router.get('/discord/callback', (req, res) => this.controller.discordCallback(req, res));
+    this.router.get('/user', (req, res) => this.controller.user(req, res));
+
     this.router.post('/verify', (req, res) => this.controller.verifyEmail(req, res));
     this.router.get(
       '/verify/:token',
