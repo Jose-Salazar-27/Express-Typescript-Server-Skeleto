@@ -13,6 +13,7 @@ export class Server extends ServerConfig {
     super();
     this.app = express();
     this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
     this.router = new MainRouter();
     this.port = this.getEnvVar('PORT');
     this.loadRoutes();

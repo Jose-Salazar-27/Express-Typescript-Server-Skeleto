@@ -21,3 +21,7 @@ describe('GET /api/users', () => {
     expect(response.status).toBe(200);
   });
 });
+
+// describe('GET /api/discord/post', () => {
+//   it('should return a list of posts depending on the role', async () => {});
+// });
