@@ -21,6 +21,18 @@ export class DiscordController {
     }
   }
 
+  async getPosts(req: Request, res: Response) {
+    try {
+      const { role } = req.body;
+      const result = await this.service.getPosts(role);
+
+      console.log('executing');
+      res.status(200).json({ result });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  }
+
   async testMessage(req: Request, res: Response) {
     console.log(req.body);
     try {
