@@ -60,6 +60,16 @@ export class AuthServices extends ServerConfig {
     return this.redirectUri;
   }
 
+  async findUserById(userId: string) {
+    return await this.supabaseClient.from('dicord_users').select('*').eq('id', userId);
+
+    // if (!res.error) {
+    //   return res;
+    // }
+
+    // return res.error;
+  }
+
   async sendToken(email: string, id: string) {
     const transporter = EmailTransporter.useTransport();
     return await transporter.sendEmail(email, id);

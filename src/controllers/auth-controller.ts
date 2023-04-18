@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TokenHandler } from '../middleware/token-handler';
 import { Token } from '../models/token-model';
-import { JwtPayload } from 'jsonwebtoken';
 
 export class AuthController {
   protected service: AuthServices;
@@ -29,23 +28,21 @@ export class AuthController {
       const accessToken = await this.service.getDiscordToken(code);
       const user = await this.service.getDiscordUser(accessToken);
 
-      // Verificar que el usario excista o no
-
-      // const { id } = user
-
-      // const dbUser = await supabase...AuthController
-
-      // if(db) {
-      //   res.redirect(redirectUri);
-      // } else {
-
-      // }
+      const { id } = user;
 
       const redirectUri = this.service.getRedirectUri();
       console.log(user);
 
-      res.cookie('discord_access_token', JSON.stringify(accessToken));
-      res.redirect(redirectUri);
+      const query = await this.service.findUserById(id);
+
+      if (query.data?.length) {
+        res.redirect(redirectUri);
+        res.cookie('discord_access_token', JSON.stringify(accessToken));
+        res.redirect(redirectUri);
+      } else {
+        // ======= TODO: ANADIR URL DEL VERIFY AQUI PARA TERMINAL ESTA RUTA ======
+        // res.redirect('URL DEL VERIFY')
+      }
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
