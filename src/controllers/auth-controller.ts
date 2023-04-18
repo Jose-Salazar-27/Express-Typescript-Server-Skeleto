@@ -63,10 +63,16 @@ export class AuthController {
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { email, id } = req.body;
-      const result = await this.service.sendToken(email, id);
+      const { email, discord_id: id } = req.body;
+      const emailStatus = await this.service.sendToken(email, id);
+      const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
 
-      res.status(200).json({ payload: result });
+      res.status(200).json({
+        payload: {
+          emailStatus,
+          saveStatus,
+        },
+      });
     } catch (err) {
       res.status(400).json({ err });
     }

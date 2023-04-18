@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
 import { ServerConfig } from '../config/server-config';
 
 export class TokenHandler extends ServerConfig {
@@ -23,11 +24,9 @@ export class TokenHandler extends ServerConfig {
     }
   }
 
-  generate(email: string, id: string) {
-    const secretKey = this.getEnvVar('JWT_PUBLIC_KEY');
-    const token = jwt.sign({ email, id }, secretKey, { expiresIn: '5m' });
-
-    return token;
+  generate() {
+    const code = uuid();
+    return code.toUpperCase().split('-').shift();
   }
 
   decode(token: string) {

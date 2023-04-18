@@ -62,17 +62,27 @@ export class AuthServices extends ServerConfig {
 
   async findUserById(userId: string) {
     return await this.supabaseClient.from('dicord_users').select('*').eq('id', userId);
-
-    // if (!res.error) {
-    //   return res;
-    // }
-
-    // return res.error;
   }
 
   async sendToken(email: string, id: string) {
     const transporter = EmailTransporter.useTransport();
-    return await transporter.sendEmail(email, id);
+    return await transporter.sendEmail(email);
+  }
+
+  async saveOne(email: string, id: string, token: any) {
+    console.log('==== RECEIVED ID: ' + id);
+    const now = new Date();
+    const expirationDate = new Date(new Date().getTime() + 5 * 60000);
+
+    return await this.supabaseClient.from('dicord_users').insert([
+      {
+        discord_id: id,
+        email,
+        token,
+        token_created: now.getTime(),
+        token_expires: expirationDate.getTime(),
+      },
+    ]);
   }
 
   async fetchUserFromDiscord({ email, id }: Token) {

@@ -17,20 +17,21 @@ export class EmailTransporter extends ServerConfig {
     });
   }
 
-  async sendEmail(email: string, id: string) {
-    const token = TokenHandler.getMiddleware().generate(email, id);
-    const BASE_URL = this.getEnvVar('BASE_URL');
+  async sendEmail(email: string) {
+    const token = TokenHandler.getMiddleware().generate();
 
-    return await this.transporter.sendMail({
+    const emailResult = await this.transporter.sendMail({
       from: 'Tiento tester & devs',
       to: email,
       subject: 'Verify your email',
-      text: `Greetings from the entire "tiento" team, please access the following link to verify your user on our platform. You only have to do it once.
-
-      ${BASE_URL}/api/auth/verify/${token}
+      text: `Greetings from the entire "tiento" team, here is Your code to finish your register process
       
+      The code is: ${token}
       `,
     });
+
+    console.log(token, emailResult);
+    return { token, emailResult };
   }
 
   static useTransport(): EmailTransporter {
