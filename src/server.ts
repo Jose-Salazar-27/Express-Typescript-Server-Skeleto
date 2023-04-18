@@ -1,10 +1,11 @@
 import express, { Router } from 'express';
-import * as dotenv from 'dotenv';
-import { MainRouter } from './routes';
-import { ServerConfig } from './config/server-config';
 import cookieparser from 'cookie-parser';
 import bearerToken from 'express-bearer-token';
 import cors from 'cors';
+
+import * as dotenv from 'dotenv';
+import { MainRouter } from './routes';
+import { ServerConfig } from './config/server-config';
 
 export class Server extends ServerConfig {
   public app: express.Application;
@@ -19,6 +20,7 @@ export class Server extends ServerConfig {
     this.app.use(express.json());
     this.app.use(cookieparser());
     this.app.use(bearerToken());
+    this.app.use(express.urlencoded({ extended: true }));
     this.router = new MainRouter();
     this.port = this.getEnvVar('PORT');
     this.loadRoutes();

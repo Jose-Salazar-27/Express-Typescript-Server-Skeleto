@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { UserRouter } from './users-routes';
 import { AuthRouter } from './auth-routes';
 import { DiscordRouter } from './discord-routes';
+import { AuthRouter } from './auth-routes';
 
 export class MainRouter {
   protected router: Router;
@@ -15,10 +16,12 @@ export class MainRouter {
     const userRuter = new UserRouter();
     const authRouter = new AuthRouter();
     const discordRouter = new DiscordRouter();
+    const authRouter = new AuthRouter();
 
     this.router.use('/users', userRuter.getRouter());
     this.router.use('/auth', authRouter.getRouter());
     this.router.use('/discord', discordRouter.getRouter());
+    this.router.use('/auth', authRouter.getRouter());
   }
 
   public getRouter(): Router {
