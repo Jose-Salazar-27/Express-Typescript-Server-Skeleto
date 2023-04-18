@@ -35,18 +35,24 @@ export class AuthController {
 
       const query = await this.service.findUserById(id);
 
+      res.cookie('discord_access_token', JSON.stringify(accessToken));
+
       if (query.data?.length) {
         res.redirect(redirectUri);
-        res.cookie('discord_access_token', JSON.stringify(accessToken));
-        res.redirect(redirectUri);
       } else {
-        // ======= TODO: ANADIR URL DEL VERIFY AQUI PARA TERMINAL ESTA RUTA ======
-        // res.redirect('URL DEL VERIFY')
+        res.redirect(redirectUri + '/verify-email');
       }
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
+  }
+
+  async test(req: Request, res: Response) {
+    const id = 'f7a3202b-6f74-4d3d-b8e5-ae3eb4b7c589';
+    const result = await this.service.findUserById(id);
+
+    res.send({ result });
   }
 
   async user(req: Request, res: Response) {

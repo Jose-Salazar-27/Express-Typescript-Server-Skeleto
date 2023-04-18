@@ -53,7 +53,7 @@ export class AuthServices extends ServerConfig {
       },
     });
 
-    return response.data.userId;
+    return response.data;
   }
 
   getRedirectUri() {
