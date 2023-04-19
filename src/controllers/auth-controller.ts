@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { TokenHandler } from '../middleware/token-handler';
-import { Token } from '../models/token-model';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { AxiosResponse } from 'axios';
 
 export class AuthController {
   protected service: AuthServices;
@@ -48,6 +48,7 @@ export class AuthController {
     }
   }
 
+  // TODO: BORRAR ESTE TEST
   async test(req: Request, res: Response) {
     const id = 'f7a3202b-6f74-4d3d-b8e5-ae3eb4b7c589';
     const result = await this.service.findUserById(id);
@@ -84,22 +85,54 @@ export class AuthController {
     }
   }
 
-  async verifyToken(req: Request, res: Response) {
+  async verifyCode(req: Request, res: Response) {
     try {
-      const { token } = req.params;
-      const decode = <Token>TokenHandler.getMiddleware().decode(token);
-      console.log('======== DECODED TOKEN ========');
-      console.log(decode);
+      const { code } = req.body;
 
-      if (!decode) {
-        return res.status(500).json({ err: 'something is wrong with jwt' });
+      if (!code) {
+        return res.status(500).json({ err: 'missing code' });
       }
 
-      const result = this.service.fetchUserFromDiscord(decode);
+      const result = await this.service.validateCode(code);
+      console.log('============= VALIDATE CODE =============');
+      console.log(result);
+
+      if (result.data?.length) {
+        const { token, token_expires, id } = result.data[0];
+
+        if (token === code && new Date().getTime() < token_expires) {
+          const updateResult = await this.service.verifyUser(id);
+          console.log('============= UPDATE RESULT =============');
+          console.log(updateResult);
+
+          const discordResult = <AxiosResponse>await this.service.fetchFromDiscord();
+          console.log('============= DISCORD RESULT =============');
+          console.log(discordResult);
+
+          if (discordResult.data?.user) {
+            const { roles } = discordResult.data.user;
+            const setDisdcordData = await this.service.setUserData(roles, id);
+
+            console.log('============= SET DISCORD RESULT =============');
+            console.log(setDisdcordData);
+
+            const redirectUri = this.service.getRedirectUri();
+
+            res.redirect(redirectUri + '/dashboard');
+            res.send({ setDisdcordData });
+          }
+        } else {
+          res.status(422).send('Invalid data');
+        }
+
+        res.send({ result });
+      } else {
+        res.status(422).json({ err: 'code in valid' });
+      }
 
       res.status(200).json({ payload: result });
     } catch (err) {
-      res.status(401).json({ err });
+      res.status(500).json({ err });
     }
   }
 }
