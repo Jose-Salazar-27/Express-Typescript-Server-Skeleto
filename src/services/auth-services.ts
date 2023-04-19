@@ -103,4 +103,29 @@ export class AuthServices extends ServerConfig {
       console.log(err);
     }
   }
+
+  async validateCode(code: string) {
+    return await this.supabaseClient.from('dicord_users').select('*').eq('token', code);
+  }
+
+  async verifyUser(id: string) {
+    return await this.supabaseClient.from('dicord_users').update({ verified: true }).eq('id', id);
+  }
+
+  async fetchFromDiscord(userId: string) {
+    try {
+      const guildId = '1086689618197483540';
+      return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
+        headers: {
+          Authorization: `Bot ${this.getEnvVar('TOKEN')}`,
+        },
+      });
+    } catch (err) {
+      return err;
+    }
+  }
+
+  async setUserData(userRole: string, id: string) {
+    return await this.supabaseClient.from('dicord_users').update({ role: userRole, verified: true }).eq('discord_id', id).select();
+  }
 }

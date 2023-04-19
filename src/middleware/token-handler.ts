@@ -24,9 +24,17 @@ export class TokenHandler extends ServerConfig {
     }
   }
 
+  // MOVER ESTO A OTRO LADO LUEGO
   generate() {
     const code = uuid();
     return code.toUpperCase().split('-').shift();
+  }
+
+  generateJWT(payload: object) {
+    const secretKey = this.getEnvVar('JWT_PUBLIC_KEY');
+    const token = jwt.sign({ payload }, secretKey, { expiresIn: '5m' });
+
+    return token;
   }
 
   decode(token: string) {

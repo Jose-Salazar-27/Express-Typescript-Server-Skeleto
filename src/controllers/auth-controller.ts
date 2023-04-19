@@ -1,7 +1,16 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { TokenHandler } from '../middleware/token-handler';
-import { Token } from '../models/token-model';
+import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
+import { AxiosResponse } from 'axios';
+
+interface CustomRequest extends Request {
+  payload: {
+    token: string;
+    token_expires?: string;
+    id: string;
+    roles?: string;
+  };
+}
 
 export class AuthController {
   protected service: AuthServices;
@@ -48,6 +57,7 @@ export class AuthController {
     }
   }
 
+  // TODO: BORRAR ESTE TEST
   async test(req: Request, res: Response) {
     const id = 'f7a3202b-6f74-4d3d-b8e5-ae3eb4b7c589';
     const result = await this.service.findUserById(id);
@@ -84,22 +94,60 @@ export class AuthController {
     }
   }
 
-  async verifyToken(req: Request, res: Response) {
+  // TODO: IMPLEMENTAR UNA INTERFAZ CUSTOMREQUEST PARA ESTOS 3
+  async verifyCode(req: any, res: Response, next: NextFunction) {
     try {
-      const { token } = req.params;
-      const decode = <Token>TokenHandler.getMiddleware().decode(token);
-      console.log('======== DECODED TOKEN ========');
-      console.log(decode);
+      const { code } = req.body;
 
-      if (!decode) {
-        return res.status(500).json({ err: 'something is wrong with jwt' });
+      const result = await this.service.validateCode(code);
+      console.log('=========== VERIFY CODE CONTROLLER ===========');
+      console.log(result);
+
+      if (result.data?.length) {
+        const { token, token_expires, discord_id } = result.data[0];
+
+        if (token === code && new Date().getTime() < token_expires) {
+          req.payload = { token, token_expires, discord_id };
+
+          next();
+        }
+      } else {
+        res.status(422).json({ err: 'code in valid' });
       }
-
-      const result = this.service.fetchUserFromDiscord(decode);
-
-      res.status(200).json({ payload: result });
     } catch (err) {
-      res.status(401).json({ err });
+      // res.status(500).json({ err });
+      next(err);
+    }
+  }
+
+  async searchInDiscord(req: any, res: Response, next: NextFunction) {
+    try {
+      const { discord_id } = req.payload;
+      const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
+      console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
+      console.log(discordResult.data);
+
+      if (discordResult.data?.user) {
+        // const { roles } = discordResult.data.user;
+        next();
+      } else {
+        res.status(500).json({ err: 'cannot found user in discord' });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async setUserData(req: any, res: Response, next: NextFunction) {
+    try {
+      const { discord_id } = req.payload;
+      const result = await this.service.setUserData('@everyone', discord_id);
+      console.log('===========  SET USER DATA CONTROLLER ===========');
+      console.log(result);
+
+      res.status(201).json({ result });
+    } catch (err) {
+      next(err);
     }
   }
 }

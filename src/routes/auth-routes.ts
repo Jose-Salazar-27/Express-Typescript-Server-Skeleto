@@ -1,18 +1,19 @@
 import { Router } from 'express';
 import { TokenHandler } from '../middleware/token-handler';
 import { AuthController } from '../controllers/auth-controller';
+import { verifyEmailValidator } from '../validators';
 
 export class AuthRouter {
   protected router: Router;
   protected controller: AuthController;
   protected service: any;
-  protected middleware: TokenHandler;
+  // protected middleware: verifyEmailValidator;
 
   constructor() {
     this.router = Router();
     this.service = '';
     this.controller = new AuthController();
-    this.middleware = TokenHandler.getMiddleware();
+    // this.middleware = verifyEmailValidator
     this.initRoutes();
   }
 
@@ -23,10 +24,12 @@ export class AuthRouter {
     this.router.get('/test', (req, res) => this.controller.test(req, res));
 
     this.router.post('/verify', (req, res) => this.controller.verifyEmail(req, res));
-    this.router.get(
+    this.router.put(
       '/verify-email',
-      (req, res, next) => this.middleware.verify(req, res, next),
-      (req, res) => this.controller.verifyToken(req, res)
+      (req, res, next) => verifyEmailValidator(req, res, next),
+      (req, res, next) => this.controller.verifyCode(req, res, next),
+      (req, res, next) => this.controller.searchInDiscord(req, res, next),
+      (req, res, next) => this.controller.setUserData(req, res, next)
     );
   }
 
