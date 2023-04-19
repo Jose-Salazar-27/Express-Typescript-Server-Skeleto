@@ -89,9 +89,11 @@ export class AuthController {
     try {
       const { code } = req.body;
 
-      if (!code) {
-        return res.status(500).json({ err: 'missing code' });
-      }
+      // TODO: ESTO DEBE VALIDARSE DESDE EL MIDDLEWARE QUE ESTA ANTES DE ESTE CONTROLLER, POR ESO LO COMENTO. EN UN PR FUTURO SE ANADE LA VALIDACION DEL CODIFGO
+
+      // if (!code) {
+      //   return res.status(500).json({ err: 'missing code' });
+      // }
 
       const result = await this.service.validateCode(code);
       console.log('============= VALIDATE CODE =============');
@@ -124,8 +126,6 @@ export class AuthController {
         } else {
           res.status(422).send('Invalid data');
         }
-
-        res.send({ result });
       } else {
         res.status(422).json({ err: 'code in valid' });
       }
