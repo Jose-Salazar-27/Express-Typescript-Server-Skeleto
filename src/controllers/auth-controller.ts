@@ -1,7 +1,16 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
+import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { AxiosResponse } from 'axios';
+
+interface CustomRequest extends Request {
+  payload: {
+    token: string;
+    token_expires?: string;
+    id: string;
+    roles?: string;
+  };
+}
 
 export class AuthController {
   protected service: AuthServices;
@@ -85,46 +94,60 @@ export class AuthController {
     }
   }
 
-  async verifyCode(req: Request, res: Response) {
+  // TODO: IMPLEMENTAR UNA INTERFAZ CUSTOMREQUEST PARA ESTOS 3
+  async verifyCode(req: any, res: Response, next: NextFunction) {
     try {
       const { code } = req.body;
 
       const result = await this.service.validateCode(code);
-      console.log('============= VALIDATE CODE =============');
+      console.log('=========== VERIFY CODE CONTROLLER ===========');
       console.log(result);
 
       if (result.data?.length) {
-        const { token, token_expires, id } = result.data[0];
+        const { token, token_expires, discord_id } = result.data[0];
 
         if (token === code && new Date().getTime() < token_expires) {
-          const updateResult = await this.service.verifyUser(id);
-          console.log('============= UPDATE RESULT =============');
-          console.log(updateResult);
+          req.payload = { token, token_expires, discord_id };
 
-          const discordResult = <AxiosResponse>await this.service.fetchFromDiscord();
-          console.log('============= DISCORD RESULT =============');
-          console.log(discordResult);
-
-          if (discordResult.data?.user) {
-            const { roles } = discordResult.data.user;
-            const setDisdcordData = await this.service.setUserData('@everyone', id);
-
-            console.log('============= SET DISCORD RESULT =============');
-            console.log(setDisdcordData);
-
-            const redirectUri = this.service.getRedirectUri();
-
-            res.redirect(redirectUri + '/dashboard');
-            res.send({ setDisdcordData });
-          }
-        } else {
-          res.status(422).send('Invalid data');
+          next();
         }
       } else {
         res.status(422).json({ err: 'code in valid' });
       }
     } catch (err) {
-      res.status(500).json({ err });
+      // res.status(500).json({ err });
+      next(err);
+    }
+  }
+
+  async searchInDiscord(req: any, res: Response, next: NextFunction) {
+    try {
+      const { discord_id } = req.payload;
+      const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
+      console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
+      console.log(discordResult.data);
+
+      if (discordResult.data?.user) {
+        // const { roles } = discordResult.data.user;
+        next();
+      } else {
+        res.status(500).json({ err: 'cannot found user in discord' });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async setUserData(req: any, res: Response, next: NextFunction) {
+    try {
+      const { discord_id } = req.payload;
+      const result = await this.service.setUserData('@everyone', discord_id);
+      console.log('===========  SET USER DATA CONTROLLER ===========');
+      console.log(result);
+
+      res.status(201).json({ result });
+    } catch (err) {
+      next(err);
     }
   }
 }

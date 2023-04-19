@@ -2,6 +2,8 @@ import express, { Router } from 'express';
 import cookieparser from 'cookie-parser';
 import bearerToken from 'express-bearer-token';
 import cors from 'cors';
+import ErrorHandler from './middleware/error-handler';
+('./middleware/error-handler');
 
 import * as dotenv from 'dotenv';
 import { MainRouter } from './routes';
@@ -24,6 +26,7 @@ export class Server extends ServerConfig {
     this.router = new MainRouter();
     this.port = this.getEnvVar('PORT');
     this.loadRoutes();
+    this.app.use(ErrorHandler);
   }
 
   public start() {

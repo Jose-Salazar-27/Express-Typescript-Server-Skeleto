@@ -27,7 +27,9 @@ export class AuthRouter {
     this.router.put(
       '/verify-email',
       (req, res, next) => verifyEmailValidator(req, res, next),
-      (req, res) => this.controller.verifyCode(req, res)
+      (req, res, next) => this.controller.verifyCode(req, res, next),
+      (req, res, next) => this.controller.searchInDiscord(req, res, next),
+      (req, res, next) => this.controller.setUserData(req, res, next)
     );
   }
 

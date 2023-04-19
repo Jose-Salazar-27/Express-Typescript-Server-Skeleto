@@ -117,7 +117,7 @@ export class AuthServices extends ServerConfig {
       const guildId = '1086689618197483540';
       return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
         headers: {
-          Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
+          Authorization: `Bot MTA5NjIwMDA1Njg5NTQ0MzA1NA.GtOfAI.s6iPI1W2QTsPP2x_vFTTRWMIxUy2xI4BRK3IGo`,
         },
       });
     } catch (err) {
@@ -126,6 +126,6 @@ export class AuthServices extends ServerConfig {
   }
 
   async setUserData(userRole: string, id: string) {
-    return await this.supabaseClient.from('dicord_users').update({ role: userRole }).eq('id', id);
+    return await this.supabaseClient.from('dicord_users').update({ role: userRole, verified: true }).eq('discord_id', id).select();
   }
 }
