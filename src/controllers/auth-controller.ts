@@ -44,7 +44,7 @@ export class AuthController {
 
       const query = await this.service.findUserById(id);
 
-      res.cookie('discord_access_token', JSON.stringify(accessToken));
+      res.cookie('discord_access_token', JSON.stringify(accessToken), { domain: 'https://react-frontend-demo.vercel.app' });
 
       if (query.data?.length) {
         res.redirect(redirectUri);
