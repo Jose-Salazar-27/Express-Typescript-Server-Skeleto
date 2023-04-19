@@ -5,4 +5,5 @@ export enum ErrorMessages {
   Password_invalid = "Your password it's wrong",
   Email_missing = 'Missing email',
   Email_invalid = 'You musts provide a valid email',
+  Invalid_code = 'You mus provide a valid verification code',
 }

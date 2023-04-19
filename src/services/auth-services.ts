@@ -117,7 +117,7 @@ export class AuthServices extends ServerConfig {
       const guildId = '1086689618197483540';
       return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
         headers: {
-          Authorization: 'Bot MTA5NjIwMDA1Njg5NTQ0MzA1NA.GeV90E.DenqGPt9KrXLrMX5H2eJlkpO4FXWx9CZ6R_bJE',
+          Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
         },
       });
     } catch (err) {

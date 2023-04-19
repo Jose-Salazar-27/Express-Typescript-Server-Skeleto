@@ -89,12 +89,6 @@ export class AuthController {
     try {
       const { code } = req.body;
 
-      // TODO: ESTO DEBE VALIDARSE DESDE EL MIDDLEWARE QUE ESTA ANTES DE ESTE CONTROLLER, POR ESO LO COMENTO. EN UN PR FUTURO SE ANADE LA VALIDACION DEL CODIFGO
-
-      // if (!code) {
-      //   return res.status(500).json({ err: 'missing code' });
-      // }
-
       const result = await this.service.validateCode(code);
       console.log('============= VALIDATE CODE =============');
       console.log(result);
@@ -113,7 +107,7 @@ export class AuthController {
 
           if (discordResult.data?.user) {
             const { roles } = discordResult.data.user;
-            const setDisdcordData = await this.service.setUserData(roles, id);
+            const setDisdcordData = await this.service.setUserData('@everyone', id);
 
             console.log('============= SET DISCORD RESULT =============');
             console.log(setDisdcordData);
@@ -129,8 +123,6 @@ export class AuthController {
       } else {
         res.status(422).json({ err: 'code in valid' });
       }
-
-      res.status(200).json({ payload: result });
     } catch (err) {
       res.status(500).json({ err });
     }
