@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { AxiosResponse } from 'axios';
+import jwt from 'jsonwebtoken'
 
 interface CustomRequest extends Request {
   payload: {
@@ -44,12 +45,13 @@ export class AuthController {
 
       const query = await this.service.findUserById(id);
 
-      res.cookie('discord_access_token', JSON.stringify(accessToken), { domain: 'https://react-frontend-demo.vercel.app' });
+      // res.cookie('discord_access_token', JSON.stringify(accessToken), { domain: 'react-frontend-demo.vercel.app', httpOnly: true, secure: true, sameSite: 'none', path: '/verify-email' });
+      const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
 
       if (query.data?.length) {
         res.redirect(redirectUri);
       } else {
-        res.redirect(redirectUri + '/verify-email');
+        res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
     } catch (error) {
       console.error(error);
@@ -66,10 +68,10 @@ export class AuthController {
   }
 
   async user(req: Request, res: Response) {
-    const accessToken = req.token;
-
+    const token = req.token as string;
     try {
-      const user = await this.service.getDiscordUser(accessToken);
+      const accessToken = jwt.verify(token, 'mySecret') as { data: string };
+      const user = await this.service.getDiscordUser(accessToken.data);
       res.json(user);
     } catch (error) {
       console.error(error);

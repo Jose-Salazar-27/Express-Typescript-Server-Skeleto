@@ -18,6 +18,7 @@ export class Server extends ServerConfig {
   constructor() {
     super();
     this.app = express();
+
     this.app.use(cors());
     this.app.use(express.json());
     this.app.use(cookieparser());
