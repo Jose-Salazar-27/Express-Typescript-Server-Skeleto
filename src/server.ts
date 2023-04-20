@@ -18,12 +18,8 @@ export class Server extends ServerConfig {
   constructor() {
     super();
     this.app = express();
-    this.app.use(
-      cors({
-        // origin: 'http://react-frontend-demo.vercel.app',
-        // credentials: true,
-      })
-    );
+
+    this.app.use(cors());
     this.app.use(express.json());
     this.app.use(cookieparser());
     this.app.use(bearerToken());
