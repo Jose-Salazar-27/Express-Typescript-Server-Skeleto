@@ -20,8 +20,8 @@ export class Server extends ServerConfig {
     this.app = express();
     this.app.use(
       cors({
-        origin: 'http://react-frontend-demo.vercel.app',
-        credentials: true,
+        // origin: 'http://react-frontend-demo.vercel.app',
+        // credentials: true,
       })
     );
     this.app.use(express.json());
