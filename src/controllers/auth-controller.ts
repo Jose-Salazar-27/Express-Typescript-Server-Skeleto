@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { AxiosResponse } from 'axios';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
 interface CustomRequest extends Request {
   payload: {
@@ -32,7 +32,7 @@ export class AuthController {
   }
 
   async discordCallback(req: Request, res: Response) {
-    const code = req.query.code;
+    const code = req.query.code as string;
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
@@ -45,11 +45,10 @@ export class AuthController {
 
       const query = await this.service.findUserById(id);
 
-      // res.cookie('discord_access_token', JSON.stringify(accessToken), { domain: 'react-frontend-demo.vercel.app', httpOnly: true, secure: true, sameSite: 'none', path: '/verify-email' });
       const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
 
-      if (query.data?.length) {
-        res.redirect(redirectUri);
+      if (query.data?.length && query.data[0].verified) {
+        res.redirect(redirectUri + `/dashboard?t=${token}`);
       } else {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
@@ -61,10 +60,8 @@ export class AuthController {
 
   // TODO: BORRAR ESTE TEST
   async test(req: Request, res: Response) {
-    const id = 'f7a3202b-6f74-4d3d-b8e5-ae3eb4b7c589';
-    const result = await this.service.findUserById(id);
-
-    res.send({ result });
+    console.log('ejecutando logica');
+    res.send('ok');
   }
 
   async user(req: Request, res: Response) {
@@ -81,7 +78,7 @@ export class AuthController {
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { email, discord_id: id } = req.body;
+      const { email, discord_id: id, token } = req.body;
       const emailStatus = await this.service.sendToken(email, id);
       const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
 
