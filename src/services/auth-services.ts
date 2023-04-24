@@ -4,6 +4,7 @@ import querystring from 'querystring';
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { Token } from '../models/token-model';
+import { TokenHandler } from '../middleware/token-handler';
 
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
@@ -22,7 +23,7 @@ export class AuthServices extends ServerConfig {
       client_id: this.discordClientId,
       grant_type: 'authorization_code',
       response_type: 'code',
-      scope: 'identify',
+      scope: 'identify guilds.join',
       client_secret: this.discordClientSecret,
     });
 
@@ -85,15 +86,22 @@ export class AuthServices extends ServerConfig {
     ]);
   }
 
-  async fetchUserFromDiscord({ email, id }: Token) {
-    const testId = '969044990481281094';
+  // Coloco token como any porque no se como se ve
+  async insertUserInDiscord(jwt: any, id: string) {
+    const access_token = TokenHandler.getMiddleware().decode(jwt);
 
+    // const idJesus = '573930706774786049';
+    // const idServer = '1086689618197483540';
     try {
-      const result = await axios.get(`https://discord.com/api/v9/guilds/1086689618197483540/members/969044990481281094`, {
-        headers: {
-          Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
-        },
-      });
+      const result = await axios.post(
+        `https://discord.com/api/v9/guilds/1086689618197483540/members/${id}`,
+        { access_token },
+        {
+          headers: {
+            Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
+          },
+        }
+      );
 
       const roles = result.data.roles;
       console.log(roles);

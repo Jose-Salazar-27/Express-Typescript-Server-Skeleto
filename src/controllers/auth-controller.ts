@@ -1,17 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { AxiosResponse } from 'axios';
 import jwt from 'jsonwebtoken';
-
-interface CustomRequest extends Request {
-  payload: {
-    token: string;
-    token_expires?: string;
-    id: string;
-    roles?: string;
-  };
-}
 
 export class AuthController {
   protected service: AuthServices;
@@ -36,6 +26,8 @@ export class AuthController {
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
+      console.log('==== ACCESS TOKEN ====');
+      console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
 
       const { id } = user;
@@ -72,7 +64,7 @@ export class AuthController {
       res.json(user);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error });
     }
   }
 
@@ -121,6 +113,7 @@ export class AuthController {
 
   async searchInDiscord(req: any, res: Response, next: NextFunction) {
     try {
+      const { token } = req.headers;
       const { discord_id } = req.payload;
       const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
       console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
@@ -130,7 +123,14 @@ export class AuthController {
         // const { roles } = discordResult.data.user;
         next();
       } else {
-        res.status(500).json({ err: 'cannot found user in discord' });
+        const insertResult = await this.service.insertUserInDiscord(token, discord_id);
+        const isValid = Object.keys(insertResult?.data).length > 0;
+
+        if (isValid) {
+          next();
+        } else {
+          res.status(500).json({ err: 'At this moment, we cannnot process your request' });
+        }
       }
     } catch (err) {
       next(err);
