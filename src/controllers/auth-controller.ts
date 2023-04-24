@@ -1,17 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { PostgrestResponse, PostgrestSingleResponse } from '@supabase/supabase-js';
 import { AxiosResponse } from 'axios';
-import jwt from 'jsonwebtoken'
-
-interface CustomRequest extends Request {
-  payload: {
-    token: string;
-    token_expires?: string;
-    id: string;
-    roles?: string;
-  };
-}
+import jwt from 'jsonwebtoken';
 
 export class AuthController {
   protected service: AuthServices;
@@ -32,10 +22,12 @@ export class AuthController {
   }
 
   async discordCallback(req: Request, res: Response) {
-    const code = req.query.code;
+    const code = req.query.code as string;
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
+      // console.log('==== ACCESS TOKEN ====');
+      // console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
 
       const { id } = user;
@@ -44,30 +36,28 @@ export class AuthController {
       console.log(user);
 
       const query = await this.service.findUserById(id);
+      console.log(query);
 
-      // res.cookie('discord_access_token', JSON.stringify(accessToken), { domain: 'react-frontend-demo.vercel.app', httpOnly: true, secure: true, sameSite: 'none', path: '/verify-email' });
       const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
 
-      if (query.data?.length) {
-        res.redirect(redirectUri);
+      if (query.data?.length && query.data[0].verified) {
+        res.redirect(redirectUri + `/dashboard?t=${token}`);
       } else {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
     } catch (error) {
       console.error(error);
-      res.status(500).send('Internal Server Error');
+      res.status(500).json({ error });
     }
   }
 
   // TODO: BORRAR ESTE TEST
   async test(req: Request, res: Response) {
-    const id = 'f7a3202b-6f74-4d3d-b8e5-ae3eb4b7c589';
-    const result = await this.service.findUserById(id);
-
-    res.send({ result });
+    console.log('ejecutando logica');
+    res.send('ok');
   }
 
-  async user(req: Request, res: Response) {
+  async user(req: any, res: Response) {
     const token = req.token as string;
     try {
       const accessToken = jwt.verify(token, 'mySecret') as { data: string };
@@ -75,13 +65,13 @@ export class AuthController {
       res.json(user);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ error });
     }
   }
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { email, discord_id: id } = req.body;
+      const { email, discord_id: id, token } = req.body;
       const emailStatus = await this.service.sendToken(email, id);
       const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
 
@@ -123,7 +113,9 @@ export class AuthController {
   }
 
   async searchInDiscord(req: any, res: Response, next: NextFunction) {
+    console.log(`Req.payload is: ${req.payload}`);
     try {
+      const token = req.token as string;
       const { discord_id } = req.payload;
       const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
       console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
@@ -133,7 +125,15 @@ export class AuthController {
         // const { roles } = discordResult.data.user;
         next();
       } else {
-        res.status(500).json({ err: 'cannot found user in discord' });
+        console.log('=========== TRY INSERT IN DISCORD ===========');
+        const insertResult = await this.service.insertUserInDiscord(token, discord_id);
+        const isValid = Object.keys(insertResult?.data).length > 0;
+
+        if (isValid) {
+          next();
+        } else {
+          res.status(500).json({ err: 'At this moment, we cannnot process your request' });
+        }
       }
     } catch (err) {
       next(err);

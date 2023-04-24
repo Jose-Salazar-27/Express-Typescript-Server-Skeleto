@@ -32,13 +32,15 @@ export class TokenHandler extends ServerConfig {
 
   generateJWT(payload: object) {
     const secretKey = this.getEnvVar('JWT_PUBLIC_KEY');
-    const token = jwt.sign({ payload }, secretKey, { expiresIn: '5m' });
+    const token = jwt.sign({ data: payload }, secretKey, { expiresIn: '5m' });
 
     return token;
   }
 
   decode(token: string) {
-    return jwt.decode(token);
+    const t = jwt.decode(token);
+    console.log(typeof t, t);
+    return t;
   }
 
   static getMiddleware() {

@@ -4,6 +4,7 @@ import querystring from 'querystring';
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { Token } from '../models/token-model';
+import { TokenHandler } from '../middleware/token-handler';
 
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
@@ -22,7 +23,7 @@ export class AuthServices extends ServerConfig {
       client_id: this.discordClientId,
       grant_type: 'authorization_code',
       response_type: 'code',
-      scope: 'identify',
+      scope: 'identify guilds.join',
       client_secret: this.discordClientSecret,
     });
 
@@ -61,7 +62,7 @@ export class AuthServices extends ServerConfig {
   }
 
   async findUserById(userId: string) {
-    return await this.supabaseClient.from('dicord_users').select('*').eq('id', userId);
+    return await this.supabaseClient.from('dicord_users').select('*').eq('discord_id', userId);
   }
 
   async sendToken(email: string, id: string) {
@@ -85,15 +86,21 @@ export class AuthServices extends ServerConfig {
     ]);
   }
 
-  async fetchUserFromDiscord({ email, id }: Token) {
-    const testId = '969044990481281094';
+  // Coloco token como any porque no se como se ve
+  async insertUserInDiscord(jwt: any, id: string) {
+    // TODO: fix this any
+    const access_token: any = TokenHandler.getMiddleware().decode(jwt);
 
     try {
-      const result = await axios.get(`https://discord.com/api/v9/guilds/1086689618197483540/members/969044990481281094`, {
-        headers: {
-          Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
-        },
-      });
+      const result = await axios.put(
+        `https://discord.com/api/v9/guilds/1086689618197483540/members/${id}`,
+        { access_token: access_token?.data },
+        {
+          headers: {
+            Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
+          },
+        }
+      );
 
       const roles = result.data.roles;
       console.log(roles);
@@ -117,7 +124,7 @@ export class AuthServices extends ServerConfig {
       const guildId = '1086689618197483540';
       return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
         headers: {
-          Authorization: `Bot ${this.getEnvVar('TOKEN')}`,
+          Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
         },
       });
     } catch (err) {
