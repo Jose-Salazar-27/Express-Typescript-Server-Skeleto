@@ -38,7 +38,9 @@ export class TokenHandler extends ServerConfig {
   }
 
   decode(token: string) {
-    return jwt.decode(token);
+    const t = jwt.decode(token);
+    console.log(typeof t, t);
+    return t;
   }
 
   static getMiddleware() {

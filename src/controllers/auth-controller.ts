@@ -26,8 +26,8 @@ export class AuthController {
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
-      console.log('==== ACCESS TOKEN ====');
-      console.log(accessToken);
+      // console.log('==== ACCESS TOKEN ====');
+      // console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
 
       const { id } = user;
@@ -36,6 +36,7 @@ export class AuthController {
       console.log(user);
 
       const query = await this.service.findUserById(id);
+      console.log(query);
 
       const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
 
@@ -46,7 +47,7 @@ export class AuthController {
       }
     } catch (error) {
       console.error(error);
-      res.status(500).send('Internal Server Error');
+      res.status(500).json({ error });
     }
   }
 
@@ -56,7 +57,7 @@ export class AuthController {
     res.send('ok');
   }
 
-  async user(req: Request, res: Response) {
+  async user(req: any, res: Response) {
     const token = req.token as string;
     try {
       const accessToken = jwt.verify(token, 'mySecret') as { data: string };
@@ -112,8 +113,9 @@ export class AuthController {
   }
 
   async searchInDiscord(req: any, res: Response, next: NextFunction) {
+    console.log(`Req.payload is: ${req.payload}`);
     try {
-      const { token } = req.headers;
+      const token = req.token as string;
       const { discord_id } = req.payload;
       const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
       console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
@@ -123,6 +125,7 @@ export class AuthController {
         // const { roles } = discordResult.data.user;
         next();
       } else {
+        console.log('=========== TRY INSERT IN DISCORD ===========');
         const insertResult = await this.service.insertUserInDiscord(token, discord_id);
         const isValid = Object.keys(insertResult?.data).length > 0;
 

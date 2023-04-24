@@ -62,7 +62,7 @@ export class AuthServices extends ServerConfig {
   }
 
   async findUserById(userId: string) {
-    return await this.supabaseClient.from('dicord_users').select('*').eq('id', userId);
+    return await this.supabaseClient.from('dicord_users').select('*').eq('discord_id', userId);
   }
 
   async sendToken(email: string, id: string) {
@@ -88,17 +88,16 @@ export class AuthServices extends ServerConfig {
 
   // Coloco token como any porque no se como se ve
   async insertUserInDiscord(jwt: any, id: string) {
-    const access_token = TokenHandler.getMiddleware().decode(jwt);
+    // TODO: fix this any
+    const access_token: any = TokenHandler.getMiddleware().decode(jwt);
 
-    // const idJesus = '573930706774786049';
-    // const idServer = '1086689618197483540';
     try {
-      const result = await axios.post(
+      const result = await axios.put(
         `https://discord.com/api/v9/guilds/1086689618197483540/members/${id}`,
-        { access_token },
+        { access_token: access_token?.data },
         {
           headers: {
-            Authorization: `Bot ${this.getEnvVar('DISCORD_TOKEN')}`,
+            Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
           },
         }
       );
@@ -125,7 +124,7 @@ export class AuthServices extends ServerConfig {
       const guildId = '1086689618197483540';
       return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
         headers: {
-          Authorization: `Bot ${this.getEnvVar('TOKEN')}`,
+          Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
         },
       });
     } catch (err) {
