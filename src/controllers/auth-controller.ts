@@ -126,7 +126,7 @@ export class AuthController {
         next();
       } else {
         console.log('=========== TRY INSERT IN DISCORD ===========');
-        const insertResult = await this.service.insertUserInDiscord(token, discord_id);
+        const insertResult = await this.service.insertUserInDiscord(token, discord_id, next);
         const isValid = Object.keys(insertResult?.data).length > 0;
 
         if (isValid) {

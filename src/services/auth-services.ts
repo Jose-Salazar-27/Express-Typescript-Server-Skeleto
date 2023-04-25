@@ -5,6 +5,7 @@ import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { Token } from '../models/token-model';
 import { TokenHandler } from '../middleware/token-handler';
+import { NextFunction } from 'express';
 
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
@@ -87,7 +88,7 @@ export class AuthServices extends ServerConfig {
   }
 
   // Coloco token como any porque no se como se ve
-  async insertUserInDiscord(jwt: any, id: string) {
+  async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
     // TODO: fix this any
     const access_token: any = TokenHandler.getMiddleware().decode(jwt);
 
@@ -108,6 +109,7 @@ export class AuthServices extends ServerConfig {
       return result;
     } catch (err) {
       console.log(err);
+      next(err);
     }
   }
 
