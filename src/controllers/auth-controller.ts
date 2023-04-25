@@ -30,10 +30,19 @@ export class AuthController {
       // console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
 
+      console.log('==== DISCORD USER ====');
+      console.log(user);
+
       const { id } = user;
 
       const redirectUri = this.service.getRedirectUri();
-      console.log(user);
+
+      const ban = await this.service.checkBan(id);
+
+      if (ban) {
+        res.redirect(redirectUri + '/banned');
+        return;
+      }
 
       const query = await this.service.findUserById(id);
       console.log(query);
@@ -49,12 +58,6 @@ export class AuthController {
       console.error(error);
       res.status(500).json({ error });
     }
-  }
-
-  // TODO: BORRAR ESTE TEST
-  async test(req: Request, res: Response) {
-    console.log('ejecutando logica');
-    res.send('ok');
   }
 
   async user(req: any, res: Response) {

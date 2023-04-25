@@ -58,6 +58,25 @@ export class AuthServices extends ServerConfig {
     return response.data;
   }
 
+  async checkBan(id: string) {
+    let status;
+    return await axios
+      .get(`https://discord.com/api/v9/guilds/1086689618197483540/bans/${id}`, {
+        headers: {
+          Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
+        },
+        validateStatus: status => status === 404,
+      })
+      .then(() => {
+        status = false;
+        return status;
+      })
+      .catch(err => {
+        status = true;
+        return status;
+      });
+  }
+
   getRedirectUri() {
     return this.redirectUri;
   }
