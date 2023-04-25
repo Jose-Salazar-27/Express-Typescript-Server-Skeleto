@@ -30,10 +30,19 @@ export class AuthController {
       // console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
 
+      console.log('==== DISCORD USER ====');
+      console.log(user);
+
       const { id } = user;
 
       const redirectUri = this.service.getRedirectUri();
-      console.log(user);
+
+      const ban = await this.service.checkBan(id);
+
+      if (ban) {
+        res.redirect(redirectUri + '/banned');
+        return;
+      }
 
       const query = await this.service.findUserById(id);
       console.log(query);
@@ -51,12 +60,6 @@ export class AuthController {
     }
   }
 
-  // TODO: BORRAR ESTE TEST
-  async test(req: Request, res: Response) {
-    console.log('ejecutando logica');
-    res.send('ok');
-  }
-
   async user(req: any, res: Response) {
     const token = req.token as string;
     try {
@@ -71,16 +74,21 @@ export class AuthController {
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { email, discord_id: id, token } = req.body;
+      const { email, discord_id: id, token, emailExist } = req.body;
       const emailStatus = await this.service.sendToken(email, id);
-      const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
 
-      res.status(200).json({
-        payload: {
-          emailStatus,
-          saveStatus,
-        },
-      });
+      if (emailExist) {
+        const updateResult = await this.service.updateOne(email, emailStatus.token!);
+        res.status(200).json({ result: updateResult });
+      } else {
+        const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
+        res.status(200).json({
+          payload: {
+            emailStatus,
+            saveStatus,
+          },
+        });
+      }
     } catch (err) {
       res.status(400).json({ err });
     }
@@ -126,7 +134,7 @@ export class AuthController {
         next();
       } else {
         console.log('=========== TRY INSERT IN DISCORD ===========');
-        const insertResult = await this.service.insertUserInDiscord(token, discord_id);
+        const insertResult = await this.service.insertUserInDiscord(token, discord_id, next);
         const isValid = Object.keys(insertResult?.data).length > 0;
 
         if (isValid) {

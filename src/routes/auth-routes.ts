@@ -22,11 +22,11 @@ export class AuthRouter {
     this.router.get('/discord', (req, res) => this.controller.discord(req, res));
     this.router.get('/discord/callback', (req, res) => this.controller.discordCallback(req, res));
     this.router.get('/user', (req, res) => this.controller.user(req, res));
-    this.router.get(
-      '/test',
-      (req, res, next) => VerifyValidator.useInstance().verifyBody(req, res, next),
-      (req, res) => this.controller.test(req, res)
-    );
+    // this.router.get(
+    // '/test',
+    // (req, res, next) => VerifyValidator.useInstance().verifyBody(req, res, next),
+    // (req, res) => this.controller.test(req, res)
+    // );
 
     this.router.post(
       '/verify',

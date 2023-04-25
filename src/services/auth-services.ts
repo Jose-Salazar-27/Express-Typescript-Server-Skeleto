@@ -5,6 +5,7 @@ import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { Token } from '../models/token-model';
 import { TokenHandler } from '../middleware/token-handler';
+import { NextFunction } from 'express';
 
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
@@ -57,6 +58,25 @@ export class AuthServices extends ServerConfig {
     return response.data;
   }
 
+  async checkBan(id: string) {
+    let status;
+    return await axios
+      .get(`https://discord.com/api/v9/guilds/1086689618197483540/bans/${id}`, {
+        headers: {
+          Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
+        },
+        validateStatus: status => status === 404,
+      })
+      .then(() => {
+        status = false;
+        return status;
+      })
+      .catch(err => {
+        status = true;
+        return status;
+      });
+  }
+
   getRedirectUri() {
     return this.redirectUri;
   }
@@ -86,8 +106,21 @@ export class AuthServices extends ServerConfig {
     ]);
   }
 
+  async updateOne(email: string, token: string) {
+    const now = new Date();
+    const expirationDate = new Date(new Date().getTime() + 5 * 60000);
+    return await this.supabaseClient
+      .from('dicord_users')
+      .update({
+        token,
+        token_created: now.getTime(),
+        token_expires: expirationDate.getTime(),
+      })
+      .eq('email', email);
+  }
+
   // Coloco token como any porque no se como se ve
-  async insertUserInDiscord(jwt: any, id: string) {
+  async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
     // TODO: fix this any
     const access_token: any = TokenHandler.getMiddleware().decode(jwt);
 
@@ -108,6 +141,7 @@ export class AuthServices extends ServerConfig {
       return result;
     } catch (err) {
       console.log(err);
+      next(err);
     }
   }
 

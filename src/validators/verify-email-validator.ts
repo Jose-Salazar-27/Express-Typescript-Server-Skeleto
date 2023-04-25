@@ -26,18 +26,26 @@ export class VerifyValidator extends ServerConfig {
     const { email, code } = req.body;
     const { data, error } = await this.supabaseClient.from('dicord_users').select('*').eq('email', email);
 
+    // console.log(data);
+
     if (error) {
       console.log(error);
       next(error);
     }
 
-    if (data && data.length > 0) {
-      const { email: userEmail, verified } = data[0];
-      if (userEmail === email && verified) {
-        next(new Error('Email already in use'));
+    if (data) {
+      const { verified, email: userEmail } = data[0] ?? {};
+      if (verified === true && userEmail === email) {
+        console.log('=== se cumplen las 2 ===');
+        res.status(422).json({ err: 'this email is already in use' });
+      } else if (userEmail === email) {
+        req.body.emailExist = true;
+        next();
+      } else {
+        console.log('=== NO se cumplen las 2 ===');
+
+        next();
       }
-    } else {
-      next();
     }
   }
 
