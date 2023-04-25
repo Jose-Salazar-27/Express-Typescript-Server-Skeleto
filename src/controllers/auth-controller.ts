@@ -71,16 +71,21 @@ export class AuthController {
 
   async verifyEmail(req: Request, res: Response) {
     try {
-      const { email, discord_id: id, token } = req.body;
+      const { email, discord_id: id, token, emailExist } = req.body;
       const emailStatus = await this.service.sendToken(email, id);
-      const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
 
-      res.status(200).json({
-        payload: {
-          emailStatus,
-          saveStatus,
-        },
-      });
+      if (emailExist) {
+        const updateResult = await this.service.updateOne(email, emailStatus.token!);
+        res.status(200).json({ result: updateResult });
+      } else {
+        const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
+        res.status(200).json({
+          payload: {
+            emailStatus,
+            saveStatus,
+          },
+        });
+      }
     } catch (err) {
       res.status(400).json({ err });
     }

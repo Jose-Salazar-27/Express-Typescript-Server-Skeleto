@@ -34,10 +34,13 @@ export class VerifyValidator extends ServerConfig {
     }
 
     if (data) {
-      const { verified, email: userEmail } = data[0] ?? null;
+      const { verified, email: userEmail } = data[0] ?? {};
       if (verified === true && userEmail === email) {
         console.log('=== se cumplen las 2 ===');
         res.status(422).json({ err: 'this email is already in use' });
+      } else if (userEmail === email) {
+        req.body.emailExist = true;
+        next();
       } else {
         console.log('=== NO se cumplen las 2 ===');
 

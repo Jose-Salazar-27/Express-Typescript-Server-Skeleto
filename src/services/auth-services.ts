@@ -87,6 +87,19 @@ export class AuthServices extends ServerConfig {
     ]);
   }
 
+  async updateOne(email: string, token: string) {
+    const now = new Date();
+    const expirationDate = new Date(new Date().getTime() + 5 * 60000);
+    return await this.supabaseClient
+      .from('dicord_users')
+      .update({
+        token,
+        token_created: now.getTime(),
+        token_expires: expirationDate.getTime(),
+      })
+      .eq('email', email);
+  }
+
   // Coloco token como any porque no se como se ve
   async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
     // TODO: fix this any
