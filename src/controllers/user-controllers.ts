@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import { supabase } from '../config/supabase-config';
 import { UserService } from '../services/user-services';
+import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
+import { Request, Response } from 'express';
 
 export class UserController {
   protected service: UserService;
@@ -8,44 +8,42 @@ export class UserController {
     this.service = new UserService();
   }
 
-  async uploadUser(req: Request, res: Response) {
-    const { name, email, password } = req.body;
+  async getPosts(req: Request, res: Response) {
+    // const role = req.body.roles[0] as string;
+    const role = req.body.role as string;
+    console.log(`role is: ${role}`);
 
-    try {
-      const result = await this.service.uploadUser(name, password, email);
-      res.status(201).json({ result });
-    } catch (err) {
-      res.status(400).json({ error: err });
-    }
-  }
+    const roles = this.service.getRoles();
 
-  async searchUser(req: Request, res: Response) {
-    const { name, email, password } = req.body;
-    console.log({
-      params: [name, email, password],
-    });
+    // const messages = await this.service.getAlphaPost();
+    // console.log(messages);
 
-    const user = await this.service.getSingleUser(email);
+    switch (role) {
+      case roles.alpha:
+        console.log('==== ALFA LOGIC ====');
+        const alphaMessages = await this.service.getAlphaPost();
+        res.send({ messages: alphaMessages });
 
-    if (!user?.data?.length || user.error) {
-      return res.status(400).json({ error: user.error || 'something was wrong fetching' });
-    }
+        break;
 
-    res.status(200).json({ payload: user });
-  }
+      case roles.legend:
+        console.log('==== LEGEND LOGIC ====');
 
-  async validateTest(req: Request, res: Response) {
-    try {
-      console.log('===== controller is running =====');
-      const users = await this.service.getUsers();
+        const legendMessages = await this.service.getLegendPosts();
+        res.send({ messages: legendMessages });
 
-      res.send({
-        ok: 'todo okay perro',
-        data: req.body,
-        users,
-      });
-    } catch (error) {
-      res.send({ error });
+        break;
+
+      case roles.tryout:
+        console.log('==== TRYOUT LOGIC ====');
+
+        const tryoutMessages = await this.service.getLegendPosts();
+        res.send({ messages: tryoutMessages });
+
+        break;
+
+      default:
+        res.status(500).json({ err: 'role not provided' });
     }
   }
 }

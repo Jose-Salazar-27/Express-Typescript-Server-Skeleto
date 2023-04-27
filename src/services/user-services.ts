@@ -1,23 +1,40 @@
-import { ServerConfig } from '../config/server-config';
+import axios from 'axios';
+import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
 
-export class UserService extends ServerConfig {
+export class UserService extends ConstraintsConfigurator {
   constructor() {
     super();
   }
 
-  async uploadUser(name: string, password: string, email: string) {
-    const payload = await this.supabaseClient.from('Users').insert([{ name, password, email }]);
+  getRoles() {
+    return this.roles;
   }
 
-  async getSingleUser(email: string) {
-    const user = await this.supabaseClient.from('Users').select('*').eq('email', email);
-    console.log('==== user ====');
-    console.log(user);
-    return user;
+  async getAlphaPost() {
+    const alphaEndpoint = axios.request({ ...this.axios_config, url: `/${this.channels.alpha}/messages` });
+    const legendEndpoint = axios.request({ ...this.axios_config, url: `/${this.channels.legend}/messages` });
+    const tryoutEndpoint = axios.request({ ...this.axios_config, url: `/${this.channels.tryout}/messages` });
+    // const legendEndpoint = axios.get(`https://discord.com/api/v9/channels/${this.channels.legend}/messages`);
+    // const tryoutEndpoint = axios.get(`https://discord.com/api/v9/channels/${this.channels.tryout}/messages`);
+
+    const responses = await axios.all([alphaEndpoint, legendEndpoint, tryoutEndpoint]);
+    responses.forEach(r => console.log(r.data));
+
+    return responses.map(r => r.data);
   }
 
-  async getUsers() {
-    const payload = await this.supabaseClient.from('Users').select('*');
-    return payload;
+  async getLegendPosts() {
+    const legendEndpoint = axios.request({ ...this.axios_config, url: `/${this.channels.legend}/messages` });
+    const tryoutEndpoint = axios.request({ ...this.axios_config, url: `/${this.channels.tryout}/messages` });
+
+    const responses = await axios.all([legendEndpoint, tryoutEndpoint]);
+
+    return responses.map(r => r.data);
+  }
+
+  async getTryoutPosts() {
+    const responses = await axios.request({ ...this.axios_config, url: `/${this.channels.tryout}/messages` });
+
+    return responses.data;
   }
 }
