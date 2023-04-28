@@ -26,12 +26,7 @@ export class AuthController {
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
-      // console.log('==== ACCESS TOKEN ====');
-      // console.log(accessToken);
       const user = await this.service.getDiscordUser(accessToken);
-
-      console.log('==== DISCORD USER ====');
-      console.log(user);
 
       const { id } = user;
 
@@ -45,8 +40,8 @@ export class AuthController {
       }
 
       const query = await this.service.findUserById(id);
-      console.log(query);
 
+      // TODO: mover esta funcion de token al tokenHandler
       const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
 
       if (query.data?.length && query.data[0].verified) {
@@ -55,7 +50,6 @@ export class AuthController {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error });
     }
   }
@@ -63,11 +57,11 @@ export class AuthController {
   async user(req: any, res: Response) {
     const token = req.token as string;
     try {
+      // TODO: mover esta funcion de token al tokenHandler
       const accessToken = jwt.verify(token, 'mySecret') as { data: string };
       const user = await this.service.getDiscordUser(accessToken.data);
       res.json(user);
     } catch (error) {
-      console.error(error);
       res.status(500).json({ error });
     }
   }
@@ -78,10 +72,10 @@ export class AuthController {
       const emailStatus = await this.service.sendToken(email, id);
 
       if (emailExist) {
-        const updateResult = await this.service.updateOne(email, emailStatus.token!);
+        const updateResult = await this.service.updateOne(email, emailStatus.code!);
         res.status(200).json({ result: updateResult });
       } else {
-        const saveStatus = await this.service.saveOne(email, id, emailStatus.token);
+        const saveStatus = await this.service.saveOne(email, id, emailStatus.code);
         res.status(200).json({
           payload: {
             emailStatus,
@@ -100,8 +94,6 @@ export class AuthController {
       const { code } = req.body;
 
       const result = await this.service.validateCode(code);
-      console.log('=========== VERIFY CODE CONTROLLER ===========');
-      console.log(result);
 
       if (result.data?.length) {
         const { token, token_expires, discord_id } = result.data[0];
@@ -115,25 +107,19 @@ export class AuthController {
         res.status(422).json({ err: 'code in valid' });
       }
     } catch (err) {
-      // res.status(500).json({ err });
-      next(err);
+      res.status(500).json({ err });
     }
   }
 
   async searchInDiscord(req: any, res: Response, next: NextFunction) {
-    console.log(`Req.payload is: ${req.payload}`);
     try {
       const token = req.token as string;
       const { discord_id } = req.payload;
       const discordResult = <AxiosResponse>await this.service.fetchFromDiscord(discord_id);
-      console.log('=========== SEARACH IN DISCORD CONTROLLER ===========');
-      console.log(discordResult.data);
 
       if (discordResult.data?.user) {
-        // const { roles } = discordResult.data.user;
         next();
       } else {
-        console.log('=========== TRY INSERT IN DISCORD ===========');
         const insertResult = await this.service.insertUserInDiscord(token, discord_id, next);
         const isValid = Object.keys(insertResult?.data).length > 0;
 
@@ -152,8 +138,6 @@ export class AuthController {
     try {
       const { discord_id } = req.payload;
       const result = await this.service.setUserData('@everyone', discord_id);
-      console.log('===========  SET USER DATA CONTROLLER ===========');
-      console.log(result);
 
       res.status(201).json({ result });
     } catch (err) {

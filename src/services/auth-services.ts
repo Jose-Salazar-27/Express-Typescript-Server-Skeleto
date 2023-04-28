@@ -124,7 +124,7 @@ export class AuthServices extends ServerConfig {
   // Coloco token como any porque no se como se ve
   async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
     // TODO: fix this any
-    const access_token: any = TokenHandler.getMiddleware().decode(jwt);
+    const access_token: any = TokenHandler.getMiddleware().decodeJWT(jwt);
 
     try {
       const result = await axios.put(
