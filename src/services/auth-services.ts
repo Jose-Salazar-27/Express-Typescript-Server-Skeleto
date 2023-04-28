@@ -19,6 +19,7 @@ export class AuthServices extends ServerConfig {
     this.redirectUri = this.getEnvVar('FRONTEND_REDIRECT_URI');
   }
 
+  // Creo que esto seria mas una utilidad
   stringifyDiscordParams() {
     const params = querystring.stringify({
       client_id: this.discordClientId,
@@ -77,6 +78,7 @@ export class AuthServices extends ServerConfig {
       });
   }
 
+  // Creo que esto seria una utilidad
   getRedirectUri() {
     return this.redirectUri;
   }

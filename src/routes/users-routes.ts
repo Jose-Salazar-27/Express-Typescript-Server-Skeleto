@@ -13,9 +13,7 @@ export class UserRouter {
   }
 
   protected initRoutes(): void {
-    this.router.get('/', (req, res) => this.controller.validateTest(req, res));
-    this.router.get('/user', (req, res) => this.controller.searchUser(req, res));
-    this.router.post('/user', (req, res) => this.controller.uploadUser(req, res));
+    this.router.get('/messages', (req, res) => this.controller.getPosts(req, res));
   }
 
   public getRouter(): Router {
