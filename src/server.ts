@@ -1,11 +1,9 @@
-import express, { Router } from 'express';
+import express from 'express';
 import cookieparser from 'cookie-parser';
 import bearerToken from 'express-bearer-token';
 import cors from 'cors';
 import ErrorHandler from './middleware/error-handler';
-('./middleware/error-handler');
 
-import * as dotenv from 'dotenv';
 import { MainRouter } from './routes';
 import { ServerConfig } from './config/server-config';
 
@@ -42,10 +40,6 @@ export class Server extends ServerConfig {
 
   protected loadRoutes() {
     this.app.use('/api', this.router.getRouter());
-  }
-
-  setPort() {
-    this.port = '3001';
   }
 
   getApp() {
