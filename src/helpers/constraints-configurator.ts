@@ -3,9 +3,10 @@ import { ServerConfig } from '../config/server-config';
 
 interface RoleSet {
   [key: string]: string;
-  alpha: string;
-  legend: string;
   tryout: string;
+  academy: string;
+  first_team: string;
+  legend: string;
 }
 
 export abstract class ConstraintsConfigurator extends ServerConfig {
@@ -26,18 +27,19 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
 
   setRoles() {
     const roles = {
-      alpha: this.getEnvVar('ALFA_ROLE_ID'),
-      legend: this.getEnvVar('LEGEND_ROLE_ID'),
       tryout: this.getEnvVar('TRYOUT_ROLE_ID'),
+      academy: this.getEnvVar('ACADEMY_ROLE_ID'),
+      first_team: this.getEnvVar('FIRST_TEAM_ROLE_ID'),
+      legend: this.getEnvVar('LEGEND_ROLE_ID'),
     };
     return roles;
   }
-
   setChannels() {
     const channels = {
-      alpha: this.getEnvVar('ALFA_CHANNEL'),
-      legend: this.getEnvVar('LEGEND_CHANNEL'),
       tryout: this.getEnvVar('TRYOUT_CHANNEL'),
+      academy: this.getEnvVar('ACADEMY_CHANNEL'),
+      first_team: this.getEnvVar('FIRST_TEAM_CHANNEL'),
+      legend: this.getEnvVar('LEGEND_CHANNEL'),
     };
 
     return channels;

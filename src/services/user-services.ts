@@ -11,67 +11,41 @@ export class UserService extends ConstraintsConfigurator {
   }
 
   // Aqui no se si tener un metodo para cada role
-  async getUserRole(username: string) {
+  public async getUserRole(username: string) {
     const response = await axios.request({ ...this.axios_config, url: `/guilds/${this.guildId}/members/search?query=${username}` });
     return response.data;
   }
 
-  async getAlphaPost() {
-    const alphaEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.alpha}/messages` });
-    const legendEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.legend}/messages` });
-    const tryoutEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.tryout}/messages` });
-
-    const responses = await axios.all([alphaEndpoint, legendEndpoint, tryoutEndpoint]);
-    responses.forEach(r => console.table(r.data));
-
-    return responses.map(r => r.data);
-  }
-
-  async getLegendPosts() {
-    const legendEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.legend}/messages` });
-    const tryoutEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.tryout}/messages` });
-
-    const responses = await axios.all([legendEndpoint, tryoutEndpoint]);
-    responses.forEach(r => console.table(r.data));
-
-    return responses.map(r => r.data);
-  }
-
-  async getTryoutPosts() {
-    const responses = await axios.request({ ...this.axios_config, url: `/channels/${this.channels.tryout}/messages` });
-    // console.log(responses.request);
-
-    console.table(responses.data);
-
-    return responses.data;
-  }
-
   // o dejo este que funciona para todos los roles
   async filterByRole(role: string) {
-    const alphaEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.alpha}/messages` });
-    const legendEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.legend}/messages` });
-    const tryoutEndpoint = axios.request({ ...this.axios_config, url: `/channels/${this.channels.tryout}/messages` });
+    const legend = axios.request({ ...this.axios_config, url: `/channels/${this.channels.legend}/messages` });
+    const first_team = axios.request({ ...this.axios_config, url: `/channels/${this.channels.first_team}/messages` });
+    const academy = axios.request({ ...this.axios_config, url: `/channels/${this.channels.academy}/messages` });
+    const tryout = axios.request({ ...this.axios_config, url: `/channels/${this.channels.tryout}/messages` });
 
-    const promises = [tryoutEndpoint, legendEndpoint, alphaEndpoint];
+    const promises = [tryout, academy, first_team, legend];
 
     switch (role) {
-      case this.roles.alpha:
-        const alpha_response = await axios.all(promises);
-
-        return alpha_response.map(r => r.data);
+      case this.roles.legend:
+        const legend_response = await axios.all(promises);
+        return legend_response.flatMap(res => res.data);
         break;
 
-      case this.roles.legend:
-        const legend_response = await axios.all(promises.slice(0, 2));
-        return legend_response.map(r => r.data);
+      case this.roles.first_team:
+        const first_team_response = await axios.all(promises.slice(0, 3));
+        return first_team_response.flatMap(res => res.data);
+        break;
+
+      case this.roles.academy:
+        const academy_response = await axios.all(promises.slice(0, 2));
+        return academy_response.flatMap(res => res.data);
         break;
 
       case this.roles.tryout:
         //
-        const tryout_response = await tryoutEndpoint;
+        const tryout_response = await tryout;
         return tryout_response.data;
         break;
-
       default:
         throw new Error('Role not provided');
         break;
