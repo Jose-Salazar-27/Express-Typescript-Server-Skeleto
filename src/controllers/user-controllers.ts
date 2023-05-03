@@ -8,27 +8,21 @@ export class UserController {
     this.service = new UserService();
   }
 
-  async getPosts(req: Request, res: Response) {
+  async messagesByRole(req: Request, res: Response) {
     try {
       const username = req.body.username as string;
-      const userInfo = await this.service.getUserRole(username);
-      const [user] = userInfo;
+      const role = await this.service.getUserRole(username);
+      const messages = await this.service.messagesByRole(role[0]);
 
-      if (user !== undefined && user !== null) {
-        const { roles } = user;
-        const posts = await this.service.filterByRole(roles[0]);
-
-        res.status(200).json(posts);
-      } else {
-        res.status(500).json({ err: 'cannot process your request at this moment' });
-      }
+      res.send(messages);
     } catch (err) {
+      console.log(err);
       res.send(err);
     }
   }
 
   // TODO: remove this
-  async getRole(req: Request, res: Response) {
+  async getUserRole(req: Request, res: Response) {
     try {
       const username = req.body.username as string;
       const role = await this.service.getUserRole(username);

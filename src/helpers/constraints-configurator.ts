@@ -13,7 +13,6 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
   public roles: RoleSet;
   public channels: RoleSet;
   protected token: string;
-  protected axios_config: AxiosRequestConfig;
   protected guildId: string;
 
   constructor() {
@@ -21,7 +20,6 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
     this.roles = this.setRoles();
     this.channels = this.setChannels();
     this.token = this.getEnvVar('BOT_TOKEN');
-    this.axios_config = this.setRequestConfig();
     this.guildId = this.getEnvVar('DISCORD_GUILD_ID');
   }
 
@@ -43,17 +41,5 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
     };
 
     return channels;
-  }
-
-  setRequestConfig() {
-    const config: AxiosRequestConfig = {
-      baseURL: 'https://discord.com/api/v9',
-      headers: {
-        Authorization: `Bot ${this.token}`,
-      },
-      method: 'get',
-    };
-
-    return config;
   }
 }

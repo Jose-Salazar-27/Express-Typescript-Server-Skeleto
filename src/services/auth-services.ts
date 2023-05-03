@@ -3,7 +3,7 @@ import querystring from 'querystring';
 
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
-import { Token } from '../models/token-model';
+// import { Token } from '../models/token-model';
 import { TokenHandler } from '../middleware/token-handler';
 import { NextFunction } from 'express';
 
