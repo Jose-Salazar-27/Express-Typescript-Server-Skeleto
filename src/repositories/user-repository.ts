@@ -48,6 +48,24 @@ export class UserRepository extends ConstraintsConfigurator {
     }
   }
 
+  // GA = GIVE AWAY
+  public async getGAByRole(role: string) {
+    const urls = {
+      [this.roles.legend]: `/channels/${this.giveAways.legend}/messages`,
+      [this.roles.first_team]: `/channels/${this.giveAways.first_team}/messages`,
+      [this.roles.academy]: `/channels/${this.giveAways.academy}/messages`,
+      [this.roles.tryout]: `/channels/${this.giveAways.tryout}/messages`,
+    };
+
+    const url = urls[role];
+    if (!url) {
+      throw new Error(`Invalid role: ${role}`);
+    }
+
+    const response: AxiosResponse<DiscordMessage[]> = await this.httpClient.get(url);
+    return response.data;
+  }
+
   setHttpClient(): AxiosInstance {
     return axios.create({
       baseURL: 'https://discord.com/api/v9',

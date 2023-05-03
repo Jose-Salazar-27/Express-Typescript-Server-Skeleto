@@ -14,6 +14,7 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
   public channels: RoleSet;
   protected token: string;
   protected guildId: string;
+  protected giveAways: RoleSet;
 
   constructor() {
     super();
@@ -21,6 +22,7 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
     this.channels = this.setChannels();
     this.token = this.getEnvVar('BOT_TOKEN');
     this.guildId = this.getEnvVar('DISCORD_GUILD_ID');
+    this.giveAways = this.setGiveAways();
   }
 
   setRoles() {
@@ -41,5 +43,16 @@ export abstract class ConstraintsConfigurator extends ServerConfig {
     };
 
     return channels;
+  }
+
+  setGiveAways() {
+    const GA: RoleSet = {
+      tryout: this.getEnvVar('TRYOUT_GA'),
+      academy: this.getEnvVar('ACADEMY_GA'),
+      first_team: this.getEnvVar('FIRST_TEAM_GA'),
+      legend: this.getEnvVar('LEGEND_GA'),
+    };
+
+    return GA;
   }
 }

@@ -21,6 +21,17 @@ export class UserController {
     }
   }
 
+  async getGiveAways(req: Request, res: Response) {
+    try {
+      const username = req.body.username as string;
+      const role = await this.service.getUserRole(username);
+      const g = await this.service.getGAByRole(role[0]);
+      res.send(g);
+    } catch (err) {
+      res.send(err);
+    }
+  }
+
   // TODO: remove this
   async getUserRole(req: Request, res: Response) {
     try {

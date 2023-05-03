@@ -16,6 +16,7 @@ export class UserRouter {
     // this.router.get('/messages', (req, res) => this.controller.getPosts(req, res));
     this.router.get('/role', (req, res) => this.controller.getUserRole(req, res));
     this.router.get('/messages', (req, res) => this.controller.messagesByRole(req, res));
+    this.router.get('/giveaways', (req, res) => this.controller.getGiveAways(req, res));
   }
 
   public getRouter(): Router {
