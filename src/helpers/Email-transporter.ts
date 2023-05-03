@@ -1,6 +1,7 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import { ServerConfig } from '../config/server-config';
 import { TokenHandler } from '../middleware/token-handler';
+import { generateCode } from './generate-code';
 
 export class EmailTransporter extends ServerConfig {
   protected transporter: Transporter;
@@ -18,7 +19,7 @@ export class EmailTransporter extends ServerConfig {
   }
 
   async sendEmail(email: string) {
-    const token = TokenHandler.getMiddleware().generate();
+    const code = generateCode();
 
     const emailResult = await this.transporter.sendMail({
       from: 'Tiento tester & devs',
@@ -26,12 +27,12 @@ export class EmailTransporter extends ServerConfig {
       subject: 'Verify your email',
       text: `Greetings from the entire "tiento" team, here is Your code to finish your register process
       
-      The code is: ${token}
+      The code is: ${code}
       `,
     });
 
-    console.log(token, emailResult);
-    return { token, emailResult };
+    console.log(emailResult);
+    return { code, emailResult };
   }
 
   static useTransport(): EmailTransporter {

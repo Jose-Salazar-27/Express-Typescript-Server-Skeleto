@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { v4 as uuid } from 'uuid';
 import { ServerConfig } from '../config/server-config';
 
 export class TokenHandler extends ServerConfig {
@@ -9,7 +8,7 @@ export class TokenHandler extends ServerConfig {
     super();
   }
 
-  verify(req: Request, res: Response, next: NextFunction) {
+  verifyJWT(req: Request, res: Response, next: NextFunction) {
     const { token } = req.params;
 
     if (!token) {
@@ -24,12 +23,6 @@ export class TokenHandler extends ServerConfig {
     }
   }
 
-  // MOVER ESTO A OTRO LADO LUEGO
-  generate() {
-    const code = uuid();
-    return code.toUpperCase().split('-').shift();
-  }
-
   generateJWT(payload: object) {
     const secretKey = this.getEnvVar('JWT_PUBLIC_KEY');
     const token = jwt.sign({ data: payload }, secretKey, { expiresIn: '5m' });
@@ -37,7 +30,7 @@ export class TokenHandler extends ServerConfig {
     return token;
   }
 
-  decode(token: string) {
+  decodeJWT(token: string) {
     const t = jwt.decode(token);
     console.log(typeof t, t);
     return t;
