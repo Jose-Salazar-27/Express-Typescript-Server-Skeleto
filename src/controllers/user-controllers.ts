@@ -1,6 +1,7 @@
 import { UserService } from '../services/user-services';
-import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
 import { Request, Response } from 'express';
+import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
+import { HttpCodes } from '../exceptions/custom-error';
 
 export class UserController {
   protected service: UserService;
@@ -10,11 +11,15 @@ export class UserController {
 
   async messagesByRole(req: Request, res: Response) {
     try {
-      const username = req.body.username as string;
-      const role = await this.service.getUserRole(username);
-      const messages = await this.service.messagesByRole(role[0]);
+      const { role_name, level } = req.body;
+      const result = await this.service.messagesByRole(role_name, level);
 
-      res.send(messages);
+      if (result === null) {
+        res.status(HttpCodes.FORBBIDEN).json({ err: 'Not allowed for your role' });
+        return;
+      }
+
+      res.status(200).json({ result });
     } catch (err) {
       console.log(err);
       res.send(err);
@@ -33,10 +38,9 @@ export class UserController {
   }
 
   // TODO: remove this
-  async getUserRole(req: Request, res: Response) {
+  async getUserRole(req: any, res: Response) {
     try {
-      const username = req.body.username as string;
-      const role = await this.service.getUserRole(username);
+      const role = req.body.roleName;
 
       res.send({ role });
     } catch (err) {
