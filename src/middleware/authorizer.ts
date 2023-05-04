@@ -19,6 +19,7 @@ export class Authorizer extends ConstraintsConfigurator {
     console.log(role);
 
     const roleName = this.setRoleName(role[0]);
+    console.log(roleName);
 
     if (roleName === undefined) {
       res.status(HttpCodes.BAD_REQUEST).json({ err: 'must provide a valid role' });
