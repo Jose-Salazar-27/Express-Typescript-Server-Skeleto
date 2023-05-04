@@ -3,6 +3,13 @@ import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
 import { TDiscordUser } from '../models/discord-user-model';
 import { DiscordMessage } from '../models/discord-messages-model';
 
+enum RoleNames {
+  TRYOUT = 'tryout',
+  ACADEMY = 'academy',
+  FIRST_TEAM = 'first_team',
+  LEGEND = 'legend',
+}
+
 export class UserRepository extends ConstraintsConfigurator {
   protected httpClient: AxiosInstance;
   constructor() {
@@ -22,21 +29,21 @@ export class UserRepository extends ConstraintsConfigurator {
     const tryout = this.httpClient.get(`/channels/${this.channels.tryout}/messages`);
 
     switch (role) {
-      case this.roles.legend:
+      case RoleNames.LEGEND:
         const legend_response: AxiosResponse<DiscordMessage[]> = await legend;
         return legend_response.data;
         break;
 
-      case this.roles.first_team:
+      case RoleNames.FIRST_TEAM:
         const first_team_response: AxiosResponse<DiscordMessage[]> = await first_team;
         return first_team_response.data;
         break;
 
-      case this.roles.academy:
+      case RoleNames.ACADEMY:
         const academy_response: AxiosResponse<DiscordMessage[]> = await academy;
         return academy_response.data;
 
-      case this.roles.tryout:
+      case RoleNames.TRYOUT:
         //
         const tryout_response: AxiosResponse<DiscordMessage[]> = await tryout;
         return tryout_response.data;
