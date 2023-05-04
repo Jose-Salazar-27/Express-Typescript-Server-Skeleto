@@ -42,6 +42,8 @@ export class Authorizer extends ConstraintsConfigurator {
       [this.roles.legend]: 'legend',
     };
 
+    console.log(`THE ROLE NAMES COLLECTION ARE`);
+
     return roleNames[role];
   }
 }
