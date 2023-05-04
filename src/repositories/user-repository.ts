@@ -2,13 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
 import { TDiscordUser } from '../models/discord-user-model';
 import { DiscordMessage } from '../models/discord-messages-model';
-
-enum RoleNames {
-  TRYOUT = 'tryout',
-  ACADEMY = 'academy',
-  FIRST_TEAM = 'first_team',
-  LEGEND = 'legend',
-}
+import { RoleNames } from '../helpers/roles';
 
 export class UserRepository extends ConstraintsConfigurator {
   protected httpClient: AxiosInstance;
