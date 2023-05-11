@@ -129,7 +129,7 @@ export class AuthServices extends ServerConfig {
     try {
       const result = await axios.put(
         `https://discord.com/api/v9/guilds/1086689618197483540/members/${id}`,
-        { access_token: access_token?.data },
+        { access_token: access_token?.data, roles: ['1096218689495371817'] },
         {
           headers: {
             Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
