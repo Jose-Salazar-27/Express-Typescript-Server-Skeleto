@@ -19,7 +19,7 @@ export class Server extends ServerConfig {
 
     this.app.use(
       cors({
-        origin: 'https://react-frontend-demo.vercel.app',
+        origin: 'https://tiento-demo.vercel.app/',
       })
     );
     this.app.use(express.json());
