@@ -1,6 +1,9 @@
-import axios from 'axios';
-import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
-import { UserRepository } from '../repositories/user-repository';
+import axios from "axios";
+import "reflect-metadata";
+import { inject, injectable } from "inversify";
+import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
+import { UserRepository } from "../repositories/user-repository";
+import { TYPES } from "../shared/constants/identifiers";
 
 const RoleLevel = {
   tryout: 1,
@@ -16,11 +19,15 @@ interface Levels {
   legend: number;
 }
 
+@injectable()
 export class UserService extends ConstraintsConfigurator {
-  private readonly repository: UserRepository;
-  constructor() {
+  public readonly repository: UserRepository;
+  constructor(
+    @inject(TYPES.UserRepository)
+    _repository: UserRepository
+  ) {
     super();
-    this.repository = new UserRepository();
+    this.repository = _repository;
   }
 
   getRoles() {

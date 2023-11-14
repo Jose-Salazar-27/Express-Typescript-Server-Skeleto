@@ -5,6 +5,7 @@ const TYPES = {
   UserRotuer: Symbol.for("UserRouter"),
   Router: Symbol.for("MainRouter"),
   Server: Symbol.for("Server"),
+  Authorizer: Symbol.for("Authorizer"),
 };
 
 export { TYPES };

@@ -1,6 +1,8 @@
-import * as dotenv from 'dotenv';
-import { SupabaseClient, createClient } from '@supabase/supabase-js';
+import * as dotenv from "dotenv";
+import { injectable } from "inversify";
+import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
+@injectable()
 export abstract class ServerConfig {
   protected supabaseClient;
 
@@ -19,8 +21,8 @@ export abstract class ServerConfig {
   }
 
   configSupabase() {
-    const supabaseUrl = this.getEnvVar('SUPABASE_URL');
-    const supabaseKey = this.getEnvVar('SUPABASE_PUBLIC_ANON_KEY');
+    const supabaseUrl = this.getEnvVar("SUPABASE_URL");
+    const supabaseKey = this.getEnvVar("SUPABASE_PUBLIC_ANON_KEY");
     const supabase = createClient<SupabaseClient>(supabaseUrl, supabaseKey);
 
     return supabase;

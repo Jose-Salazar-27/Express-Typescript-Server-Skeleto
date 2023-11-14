@@ -1,35 +1,26 @@
-import express from 'express';
-import cookieparser from 'cookie-parser';
-import bearerToken from 'express-bearer-token';
-import cors from 'cors';
-import ErrorHandler from './middleware/error-handler';
+import express from "express";
+import "reflect-metadata";
+import { inject, injectable } from "inversify";
+import { MainRouter } from "./routes";
+import { ServerConfig } from "./config/server-config";
+import { loadDependencies, middlewares } from "./config/load-server-middlwares";
+import { IRouter, IServer } from "./dependency-injection";
+import { TYPES } from "./shared/constants/identifiers";
 
-import { MainRouter } from './routes';
-import { ServerConfig } from './config/server-config';
-
-export class Server extends ServerConfig {
+@injectable()
+export class Server extends ServerConfig implements IServer {
   public app: express.Application;
-  private router;
+  public readonly router: IRouter;
   private port;
   private server: any;
 
-  constructor() {
+  constructor(@inject(TYPES.Router) _router: MainRouter) {
     super();
     this.app = express();
-
-    this.app.use(
-      cors({
-        origin: 'https://tiento-demo.vercel.app',
-      })
-    );
-    this.app.use(express.json());
-    this.app.use(cookieparser());
-    this.app.use(bearerToken());
-    this.app.use(express.urlencoded({ extended: true }));
-    this.router = new MainRouter();
-    this.port = this.getEnvVar('PORT');
+    this.router = _router;
+    this.port = this.getEnvVar("PORT");
     this.loadRoutes();
-    this.app.use(ErrorHandler);
+    loadDependencies(this.app, middlewares);
   }
 
   public start() {
@@ -43,7 +34,7 @@ export class Server extends ServerConfig {
   }
 
   protected loadRoutes() {
-    this.app.use('/api', this.router.getRouter());
+    this.app.use("/api", this.router.getRouter());
   }
 
   getApp() {

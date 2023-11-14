@@ -1,6 +1,7 @@
 import type { Router } from "express";
 import type { IUserController } from "./controller-interfaces";
 import type { Authorizer } from "../../middleware/authorizer";
+import { IAuthorizer } from "./middleware-interfaces";
 
 export interface IRouter {
   readonly router: Router;
@@ -11,7 +12,7 @@ export interface IRouter {
 export interface IUserRouter {
   router: Router;
   controller: IUserController;
-  middleware: Authorizer;
+  middleware: IAuthorizer;
   initRoutes(): void;
   getRouter(): Router;
 }
