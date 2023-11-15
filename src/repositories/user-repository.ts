@@ -3,7 +3,7 @@ import { injectable } from "inversify";
 import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
 import { TDiscordUser } from "../models/discord-user-model";
 import { DiscordMessage } from "../models/discord-messages-model";
-import { RoleNames } from "../helpers/roles";
+import { RoleNames, RoleNamesIndice } from "../helpers/roles";
 
 @injectable()
 export class UserRepository extends ConstraintsConfigurator {
@@ -21,46 +21,17 @@ export class UserRepository extends ConstraintsConfigurator {
 
   // returns  Promise<AxiosResponse<IDiscordUser[] | IDiscordUser>>
   public async messagesByRole(role: string) {
-    const legend = this.httpClient.get(
-      `/channels/${this.channels.legend}/messages`
-    );
-    const first_team = this.httpClient.get(
-      `/channels/${this.channels.first_team}/messages`
-    );
-    const academy = this.httpClient.get(
-      `/channels/${this.channels.academy}/messages`
-    );
-    const tryout = this.httpClient.get(
-      `/channels/${this.channels.tryout}/messages`
-    );
+    const rolesMap = {
+      [RoleNames.LEGEND]: `/channels/${this.channels.legend}/messages`,
+      [RoleNames.FIRST_TEAM]: `/channels/${this.channels.first_team}/messages`,
+      [RoleNames.ACADEMY]: `/channels/${this.channels.academy}/messages`,
+      [RoleNames.TRYOUT]: `/channels/${this.channels.tryout}/messages`,
+    };
 
-    // todo: refactor this switch
-    switch (role) {
-      case RoleNames.LEGEND:
-        const legend_response: AxiosResponse<DiscordMessage[]> = await legend;
-        return legend_response.data;
-        break;
+    const messageUrl = rolesMap[role as keyof RoleNamesIndice];
+    const response = await this.httpClient.get<DiscordMessage[]>(messageUrl);
 
-      case RoleNames.FIRST_TEAM:
-        const first_team_response: AxiosResponse<DiscordMessage[]> =
-          await first_team;
-        return first_team_response.data;
-        break;
-
-      case RoleNames.ACADEMY:
-        const academy_response: AxiosResponse<DiscordMessage[]> = await academy;
-        return academy_response.data;
-
-      case RoleNames.TRYOUT:
-        //
-        const tryout_response: AxiosResponse<DiscordMessage[]> = await tryout;
-        return tryout_response.data;
-        break;
-
-      default:
-        throw new Error("Role not provided");
-        break;
-    }
+    return response.data;
   }
 
   // GA = GIVE AWAY
