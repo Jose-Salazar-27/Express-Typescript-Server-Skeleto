@@ -1,11 +1,10 @@
 import axios from 'axios';
 import querystring from 'querystring';
-
+import type { NextFunction } from 'express';
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
-// import { Token } from '../models/token-model';
 import { TokenHandler } from '../middleware/token-handler';
-import { NextFunction } from 'express';
+import { TABLES } from '../shared/constants'
 
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
@@ -84,7 +83,7 @@ export class AuthServices extends ServerConfig {
   }
 
   async findUserById(userId: string) {
-    return await this.supabaseClient.from('dicord_users').select('*').eq('discord_id', userId);
+    return await this.supabaseClient.from(TABLES.DISCORD_USER).select('*').eq('discord_id', userId);
   }
 
   async sendToken(email: string, id: string) {
@@ -93,11 +92,11 @@ export class AuthServices extends ServerConfig {
   }
 
   async saveOne(email: string, id: string, token: any) {
-    console.log('==== RECEIVED ID: ' + id);
+    // console.log('==== RECEIVED ID: ' + id);
     const now = new Date();
     const expirationDate = new Date(new Date().getTime() + 5 * 60000);
 
-    return await this.supabaseClient.from('dicord_users').insert([
+    return await this.supabaseClient.from(TABLES.DISCORD_USER).insert([
       {
         discord_id: id,
         email,
@@ -112,7 +111,7 @@ export class AuthServices extends ServerConfig {
     const now = new Date();
     const expirationDate = new Date(new Date().getTime() + 5 * 60000);
     return await this.supabaseClient
-      .from('dicord_users')
+      .from(TABLES.DISCORD_USER)
       .update({
         token,
         token_created: now.getTime(),
@@ -121,7 +120,6 @@ export class AuthServices extends ServerConfig {
       .eq('email', email);
   }
 
-  // Coloco token como any porque no se como se ve
   async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
     // TODO: fix this any
     const access_token: any = TokenHandler.getMiddleware().decodeJWT(jwt);
@@ -137,9 +135,6 @@ export class AuthServices extends ServerConfig {
         }
       );
 
-      const roles = result.data.roles;
-      console.log(roles);
-
       return result;
     } catch (err) {
       console.log(err);
@@ -148,11 +143,11 @@ export class AuthServices extends ServerConfig {
   }
 
   async validateCode(code: string) {
-    return await this.supabaseClient.from('dicord_users').select('*').eq('token', code);
+    return await this.supabaseClient.from(TABLES.DISCORD_USER).select('*').eq('token', code);
   }
 
   async verifyUser(id: string) {
-    return await this.supabaseClient.from('dicord_users').update({ verified: true }).eq('id', id);
+    return await this.supabaseClient.from(TABLES.DISCORD_USER).update({ verified: true }).eq('id', id);
   }
 
   async fetchFromDiscord(userId: string) {
@@ -169,6 +164,6 @@ export class AuthServices extends ServerConfig {
   }
 
   async setUserData(userRole: string, id: string) {
-    return await this.supabaseClient.from('dicord_users').update({ role: userRole, verified: true }).eq('discord_id', id).select();
+    return await this.supabaseClient.from(TABLES.DISCORD_USER).update({ role: userRole, verified: true }).eq('discord_id', id).select();
   }
 }
