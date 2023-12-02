@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { inject, injectable } from "inversify";
-import { UserRouter } from "./users-routes";
 import { AuthRouter } from "./auth-routes";
 import { IRouter, IUserRouter } from "../dependency-injection";
 import { TYPES } from "../shared/constants/identifiers";
@@ -9,14 +8,17 @@ import { TYPES } from "../shared/constants/identifiers";
 export class MainRouter implements IRouter {
   public router: Router;
 
-  constructor(@inject(TYPES.UserRotuer) _userRouter: IUserRouter) {
+  constructor(
+    @inject(TYPES.UserRotuer) _userRouter: IUserRouter,
+    @inject(TYPES.Auth.router) _authRouter: AuthRouter
+  ) {
     this.router = Router();
-    this.loadRoutes(_userRouter);
+    this.loadRoutes(_userRouter, _authRouter);
   }
 
-  public loadRoutes(_userRouter: IUserRouter): void {
+  public loadRoutes(_userRouter: IUserRouter, authRouter: AuthRouter): void {
     const userRuter = _userRouter;
-    const authRouter = new AuthRouter();
+    // const authRouter = authRouter;
 
     this.router.use("/users", userRuter.getRouter());
     this.router.use("/auth", authRouter.getRouter());

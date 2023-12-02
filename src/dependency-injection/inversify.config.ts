@@ -15,6 +15,9 @@ import { Server } from "../server";
 import { UserController } from "../controllers/user-controllers";
 import type { IAuthorizer } from "./interfaces/middleware-interfaces";
 import { Authorizer } from "../middleware/authorizer";
+import { AuthServices } from "../services/auth-services";
+import { AuthController } from "../controllers/auth-controller";
+import { AuthRouter } from "../routes/auth-routes";
 
 export const container = new Container();
 
@@ -23,9 +26,11 @@ container.bind<IAuthorizer>(TYPES.Authorizer).to(Authorizer);
 
 // setup controllers
 container.bind<IUserController>(TYPES.UserController).to(UserController);
+container.bind(TYPES.Auth.controller).to(AuthController)
 
 // setup services
 container.bind<IUserService>(TYPES.UserService).to(UserService);
+container.bind(TYPES.Auth.service).to(AuthServices)
 
 // setup repositories
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
@@ -33,6 +38,7 @@ container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 // setup routers
 container.bind<IRouter>(TYPES.Router).to(MainRouter);
 container.bind<IUserRouter>(TYPES.UserRotuer).to(UserRouter);
+container.bind(TYPES.Auth.router).to(AuthRouter)
 
 // setup server
 container.bind<IServer>(TYPES.Server).to(Server);

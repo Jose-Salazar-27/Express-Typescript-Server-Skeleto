@@ -1,20 +1,18 @@
 import { Router } from 'express';
-import { TokenHandler } from '../middleware/token-handler';
+import { inject, injectable } from 'inversify';
 import { AuthController } from '../controllers/auth-controller';
 import { verifyEmailValidator } from '../validators';
 import { VerifyValidator } from '../validators/verify-email-validator';
+import { TYPES } from '../shared/constants';
 
+@injectable()
 export class AuthRouter {
   protected router: Router;
   protected controller: AuthController;
-  protected service: any;
-  // protected middleware: verifyEmailValidator;
 
-  constructor() {
+  constructor(@inject(TYPES.Auth.controller) _controller: AuthController) {
     this.router = Router();
-    this.service = '';
-    this.controller = new AuthController();
-    // this.middleware = verifyEmailValidator
+    this.controller = _controller;
     this.initRoutes();
   }
 
@@ -35,6 +33,10 @@ export class AuthRouter {
       (req, res, next) => this.controller.searchInDiscord(req, res, next),
       (req, res, next) => this.controller.setUserData(req, res, next)
     );
+    this.router.get('/instagram', (req, res)=> {
+      console.log(req.query);
+      return
+    })
   }
 
   getRouter() {

@@ -1,11 +1,13 @@
 import axios from 'axios';
 import querystring from 'querystring';
+import { injectable } from 'inversify';
 import type { NextFunction } from 'express';
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { TokenHandler } from '../middleware/token-handler';
 import { TABLES } from '../shared/constants'
 
+@injectable()
 export class AuthServices extends ServerConfig {
   protected discordClientId: string;
   protected discordClientSecret: string;

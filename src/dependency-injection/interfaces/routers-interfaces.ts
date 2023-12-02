@@ -2,10 +2,11 @@ import type { Router } from "express";
 import type { IUserController } from "./controller-interfaces";
 import type { Authorizer } from "../../middleware/authorizer";
 import { IAuthorizer } from "./middleware-interfaces";
+import { AuthRouter } from "../../routes/auth-routes";
 
 export interface IRouter {
   readonly router: Router;
-  loadRoutes(_userRouter: IUserRouter): void;
+  loadRoutes(_userRouter: IUserRouter, authRouter: AuthRouter): void;
   getRouter(): Router;
 }
 
