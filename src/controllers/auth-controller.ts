@@ -1,13 +1,16 @@
+import jwt from 'jsonwebtoken';
+import { inject, injectable } from 'inversify';
+import { AxiosResponse } from 'axios';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
-import { AxiosResponse } from 'axios';
-import jwt from 'jsonwebtoken';
+import { TYPES } from '../shared/constants';
 
+@injectable()
 export class AuthController {
-  protected service: AuthServices;
+  public readonly service: AuthServices;
 
-  constructor() {
-    this.service = new AuthServices();
+  constructor(@inject(TYPES.Auth.service) _service: AuthServices) {
+    this.service = _service;
   }
 
   async discord(req: Request, res: Response) {
