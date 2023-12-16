@@ -1,21 +1,27 @@
-import { Router } from 'express';
-import { UserRouter } from './users-routes';
-import { AuthRouter } from './auth-routes';
+import { Router } from "express";
+import { inject, injectable } from "inversify";
+import { AuthRouter } from "./auth-routes";
+import { IRouter, IUserRouter } from "../dependency-injection";
+import { TYPES } from "../shared/constants/identifiers";
 
-export class MainRouter {
-  protected router: Router;
+@injectable()
+export class MainRouter implements IRouter {
+  public router: Router;
 
-  constructor() {
+  constructor(
+    @inject(TYPES.UserRotuer) _userRouter: IUserRouter,
+    @inject(TYPES.Auth.router) _authRouter: AuthRouter
+  ) {
     this.router = Router();
-    this.loadRoutes();
+    this.loadRoutes(_userRouter, _authRouter);
   }
 
-  private loadRoutes(): void {
-    const userRuter = new UserRouter();
-    const authRouter = new AuthRouter();
+  public loadRoutes(_userRouter: IUserRouter, authRouter: AuthRouter): void {
+    const userRuter = _userRouter;
+    // const authRouter = authRouter;
 
-    this.router.use('/users', userRuter.getRouter());
-    this.router.use('/auth', authRouter.getRouter());
+    this.router.use("/users", userRuter.getRouter());
+    this.router.use("/auth", authRouter.getRouter());
   }
 
   public getRouter(): Router {

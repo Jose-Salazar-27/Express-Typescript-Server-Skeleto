@@ -1,12 +1,15 @@
-import { UserService } from '../services/user-services';
-import { Request, Response } from 'express';
-import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
-import { HttpCodes } from '../exceptions/custom-error';
+import { UserService } from "../services/user-services";
+import { Request, Response } from "express";
+import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
+import { HttpCodes } from "../exceptions/custom-error";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../shared/constants/identifiers";
 
+@injectable()
 export class UserController {
-  protected service: UserService;
-  constructor() {
-    this.service = new UserService();
+  public readonly service: UserService;
+  constructor(@inject(TYPES.UserService) _service: UserService) {
+    this.service = _service;
   }
 
   async messagesByRole(req: Request, res: Response) {
@@ -15,7 +18,9 @@ export class UserController {
       const result = await this.service.messagesByRole(role_name, level);
 
       if (result === null) {
-        res.status(HttpCodes.FORBBIDEN).json({ err: 'Not allowed for your role' });
+        res
+          .status(HttpCodes.FORBBIDEN)
+          .json({ err: "Not allowed for your role" });
         return;
       }
 

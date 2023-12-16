@@ -1,13 +1,18 @@
-import { Request, Response, NextFunction } from 'express';
-import { ConstraintsConfigurator } from '../helpers/constraints-configurator';
-import { UserService } from '../services/user-services';
-import { CustomError, HttpCodes } from '../exceptions/custom-error';
+import { inject, injectable } from "inversify";
+import type { Request, Response, NextFunction } from "express";
+import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
+import { UserService } from "../services/user-services";
+import { CustomError, HttpCodes } from "../exceptions/custom-error";
+import { UserRepository } from "../repositories/user-repository";
+import { TYPES } from "../shared/constants/identifiers";
+import { IUserService } from "../dependency-injection";
 
+@injectable()
 export class Authorizer extends ConstraintsConfigurator {
-  private readonly service: UserService;
-  constructor() {
+  public readonly service: UserService;
+  constructor(@inject(TYPES.UserService) _userService: UserService) {
     super();
-    this.service = new UserService();
+    this.service = _userService;
   }
 
   async authorize(req: Request, res: Response, next: NextFunction) {
@@ -22,9 +27,11 @@ export class Authorizer extends ConstraintsConfigurator {
     console.log(roleName);
 
     if (roleName === undefined) {
-      res.status(HttpCodes.BAD_REQUEST).json({ err: 'must provide a valid role' });
+      res
+        .status(HttpCodes.BAD_REQUEST)
+        .json({ err: "must provide a valid role" });
       throw new CustomError({
-        description: 'must provide a valid role',
+        description: "must provide a valid role",
         httpCode: HttpCodes.BAD_REQUEST,
       });
     }
@@ -34,12 +41,12 @@ export class Authorizer extends ConstraintsConfigurator {
     next();
   }
 
-  private setRoleName(role: string) {
+  public setRoleName(role: string) {
     const roleNames = {
-      [this.roles.tryout]: 'tryout',
-      [this.roles.academy]: 'academy',
-      [this.roles.first_team]: 'first_team',
-      [this.roles.legend]: 'legend',
+      [this.roles.tryout]: "tryout",
+      [this.roles.academy]: "academy",
+      [this.roles.first_team]: "first_team",
+      [this.roles.legend]: "legend",
     };
 
     console.log(`THE ROLE NAMES COLLECTION ARE ${roleNames}`);

@@ -1,9 +1,8 @@
-import { Server } from './server';
+import "reflect-metadata";
+import { container } from "./dependency-injection";
+import { Server } from "./server";
+import { TYPES } from "./shared/constants/identifiers";
 
-(async () => {
-  try {
-    new Server().start();
-  } catch (err) {
-    console.log(err);
-  }
-})();
+const server = container.get<Server>(TYPES.Server);
+
+server.start();

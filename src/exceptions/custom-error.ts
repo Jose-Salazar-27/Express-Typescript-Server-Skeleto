@@ -1,4 +1,4 @@
-import { ErrorArgs } from './interfaces/custom-error-args';
+import { ErrorArgs } from "./interfaces/custom-error-args";
 
 export enum HttpCodes {
   OK = 200,
@@ -20,7 +20,7 @@ export class CustomError extends Error {
 
     Object.setPrototypeOf(this, new.target.prototype);
 
-    this.name = args.name || 'Error';
+    this.name = args.name || "Error";
     this.httpCode = args.httpCode;
 
     if (args.isOperational !== undefined) {
@@ -28,5 +28,32 @@ export class CustomError extends Error {
     }
 
     Error.captureStackTrace(this);
+  }
+}
+
+export class HttpException extends Error {
+  private readonly _code: number;
+  private readonly _context: { [key: string]: any };
+
+  constructor(params?: {
+    code?: number;
+    message?: string;
+    context?: { [key: string]: any };
+  }) {
+    const { code, message } = params || {};
+
+    super(message || "Bad request");
+    this._code = code || 500;
+    this._context = params?.context || {};
+
+    Object.setPrototypeOf(this, HttpException.prototype);
+  }
+
+  get errors() {
+    return [{ message: this.message, context: this._context }];
+  }
+
+  get statusCode() {
+    return this._code;
   }
 }
