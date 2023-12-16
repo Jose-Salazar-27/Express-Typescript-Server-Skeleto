@@ -7,3 +7,7 @@ export interface IUserController {
   getGiveAways(req: Request, res: Response): Promise<void>;
   getUserRole(req: any, res: Response): Promise<void>;
 }
+
+export interface ISocialMediaController {
+  getInstagramPhotos(req: Request, res: Response): void;
+}

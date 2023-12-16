@@ -11,7 +11,14 @@ const TYPES = {
     service: Symbol.for("AuthService"),
     controller: Symbol.for("AuthController"),
     router: Symbol.for("AuthRouter"),
-  }
+  },
+
+  Social_Media: {
+    repository: Symbol.for("SocialMediaRepository"),
+    service: Symbol.for("SocialMediaService"),
+    controller: Symbol.for("SocialMediaController"),
+    router: Symbol.for("SocialMediaRouter"),
+  },
 };
 
 export { TYPES };

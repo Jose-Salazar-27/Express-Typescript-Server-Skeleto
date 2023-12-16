@@ -7,3 +7,7 @@ export interface IUserRepository<T = TDiscordUser, D = DiscordMessage> {
   messagesByRole(role: string): Promise<D[]>;
   getGAByRole(role: string): Promise<D[]>;
 }
+
+export interface ISocialMediaRepository {
+  getInstagramPhoto(index: number): string;
+}

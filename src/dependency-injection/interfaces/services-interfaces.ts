@@ -7,3 +7,7 @@ export interface IUserService<T = DiscordMessage> {
   messagesByRole(roleName: string, level: string): Promise<T[] | null>;
   getGAByRole(role: string): Promise<T[]>;
 }
+
+export interface ISocialMediaService {
+  getInstagramPhotos(): string[];
+}
