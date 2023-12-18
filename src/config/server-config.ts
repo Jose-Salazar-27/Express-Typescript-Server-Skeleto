@@ -1,4 +1,3 @@
-import * as dotenv from "dotenv";
 import { injectable } from "inversify";
 import { SupabaseClient, createClient } from "@supabase/supabase-js";
 
@@ -7,7 +6,6 @@ export abstract class ServerConfig {
   protected supabaseClient;
 
   constructor() {
-    dotenv.config();
     this.supabaseClient = this.configSupabase();
   }
 

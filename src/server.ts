@@ -1,6 +1,6 @@
 import express from 'express';
-import 'reflect-metadata';
 import { inject, injectable } from 'inversify';
+import type { Server as HttpServer } from 'http';
 import { MainRouter } from './routes';
 import { ServerConfig } from './config/server-config';
 import { IRouter, IServer } from './dependency-injection';
@@ -15,7 +15,7 @@ export class Server extends ServerConfig implements IServer {
   public app: express.Application;
   public readonly router: IRouter;
   private port;
-  private server: any;
+  private server?: HttpServer;
 
   constructor(@inject(TYPES.Router) _router: MainRouter) {
     super();
@@ -42,7 +42,7 @@ export class Server extends ServerConfig implements IServer {
   }
 
   stop() {
-    this.server.close();
+    this.server!.close();
   }
 
   protected loadRoutes() {
