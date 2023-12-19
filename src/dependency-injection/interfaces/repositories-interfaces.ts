@@ -1,6 +1,6 @@
-import type { AxiosResponse } from "axios";
-import type { DiscordMessage } from "../../models/discord-messages-model";
-import type { TDiscordUser } from "../../models/discord-user-model";
+import type { AxiosResponse } from 'axios';
+import type { DiscordMessage } from '../../models/discord-messages-model';
+import type { TDiscordUser } from '../../models/discord-user-model';
 
 export interface IUserRepository<T = TDiscordUser, D = DiscordMessage> {
   findRole(username: string): Promise<AxiosResponse<T>>;
@@ -10,4 +10,5 @@ export interface IUserRepository<T = TDiscordUser, D = DiscordMessage> {
 
 export interface ISocialMediaRepository {
   getInstagramPhoto(index: number): string;
+  getDiscordNews(limit: number): Promise<any[]>;
 }

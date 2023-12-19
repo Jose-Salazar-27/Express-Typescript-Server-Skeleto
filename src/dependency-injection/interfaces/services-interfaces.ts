@@ -1,5 +1,6 @@
-import type { DiscordMessage } from "../../models/discord-messages-model";
-import type { IUserRepository } from "./repositories-interfaces";
+import type { DiscordMessage } from '../../models/discord-messages-model';
+import { CommunityMessage } from '../../shared/types';
+import type { IUserRepository } from './repositories-interfaces';
 
 export interface IUserService<T = DiscordMessage> {
   readonly repository: IUserRepository;
@@ -10,4 +11,5 @@ export interface IUserService<T = DiscordMessage> {
 
 export interface ISocialMediaService {
   getInstagramPhotos(): string[];
+  getDiscordNews(limit: number): Promise<CommunityMessage[]>;
 }
