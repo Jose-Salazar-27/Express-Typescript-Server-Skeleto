@@ -5,7 +5,7 @@ import { HttpCodes, HttpException } from '../exceptions/custom-error';
 import { TYPES, buckets } from '../shared/constants';
 import { DiscordMessage } from '../models/discord-messages-model';
 import { AxiosInstance } from 'axios';
-import { discordChannelsId } from '../shared/constants/discord-channels';
+import { discordChannelsId } from '../shared/constants/discord';
 
 @injectable()
 export class SocialMediaRepository {
