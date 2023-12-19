@@ -1,5 +1,5 @@
-import type { Request, Response } from "express";
-import type { IUserService } from "./services-interfaces";
+import type { Request, Response } from 'express';
+import type { IUserService } from './services-interfaces';
 
 export interface IUserController {
   readonly service: IUserService;
@@ -10,4 +10,5 @@ export interface IUserController {
 
 export interface ISocialMediaController {
   getInstagramPhotos(req: Request, res: Response): void;
+  getDiscordNews(req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 }

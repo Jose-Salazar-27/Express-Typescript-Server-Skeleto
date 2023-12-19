@@ -7,4 +7,5 @@ export enum ErrorMessages {
   Email_invalid = 'You musts provide a valid email',
   Email_in_use = 'this email is already in use',
   Invalid_code = 'You mus provide a valid verification code',
+  Missing_data = 'not enough data provied',
 }
