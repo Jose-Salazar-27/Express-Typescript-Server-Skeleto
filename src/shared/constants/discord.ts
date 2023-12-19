@@ -4,3 +4,5 @@ export const discordChannelsId = Object.freeze({
   news: '1186291943861399572',
   updates: '1186291979051614288',
 });
+
+export const guildId = '1086689618197483540';
