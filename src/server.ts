@@ -8,6 +8,7 @@ import { TYPES } from './shared/constants/identifiers';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bearerToken from 'express-bearer-token';
+import morgan from 'morgan';
 import ErrorHandler from './middleware/error-handler';
 
 @injectable()
@@ -31,6 +32,7 @@ export class Server extends ServerConfig implements IServer {
     this.app.use(express.urlencoded({ extended: true }));
     this.router = _router;
     this.port = this.getEnvVar('PORT');
+    this.app.use(morgan('combined'));
     this.loadRoutes();
     this.app.use(ErrorHandler);
   }
