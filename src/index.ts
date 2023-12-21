@@ -5,7 +5,7 @@ import { TYPES } from './shared/constants/identifiers';
 
 const bootstrap = async (): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    dotenv.config();
+    dotenv.config({ path: `${__dirname}/../.env.${process.env.NODE_ENV}` });
     resolve();
   })
     .then(() => {
