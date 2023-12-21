@@ -24,6 +24,10 @@ const TYPES = {
     http: Symbol.for('AxiosInstace'),
     supabase: Symbol.for('SupabaseClient'),
   },
+
+  helpers: {
+    email: Symbol.for('EmailTransporter'),
+  },
 };
 
 export { TYPES };

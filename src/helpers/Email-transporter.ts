@@ -1,19 +1,20 @@
 import nodemailer, { Transporter } from 'nodemailer';
+import { injectable } from 'inversify';
 import { ServerConfig } from '../config/server-config';
 import { TokenHandler } from '../middleware/token-handler';
 import { generateCode } from './generate-code';
+import { getEnv } from './getenv';
 
-export class EmailTransporter extends ServerConfig {
+@injectable()
+export class EmailTransporter {
   protected transporter: Transporter;
-  static instance?: EmailTransporter;
 
-  private constructor() {
-    super();
+  constructor() {
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: this.getEnvVar('EMAIL'),
-        pass: this.getEnvVar('EMAIL_PASSWORD'),
+        user: getEnv('EMAIL'),
+        pass: getEnv('EMAIL_PASSWORD'),
       },
     });
   }
@@ -31,15 +32,6 @@ export class EmailTransporter extends ServerConfig {
       `,
     });
 
-    console.log(emailResult);
     return { code, emailResult };
-  }
-
-  static useTransport(): EmailTransporter {
-    if (!this.instance) {
-      this.instance = new EmailTransporter();
-    }
-
-    return this.instance;
   }
 }

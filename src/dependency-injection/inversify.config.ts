@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-// import { UserController } from ".src/controllers/user-controllers";
 import { TYPES } from '../shared/constants/identifiers';
 import { UserRepository } from '../repositories/user-repository';
 import { UserService } from '../services/user-services';
@@ -26,6 +25,7 @@ import { AxiosInstance } from 'axios';
 import { setupHttpClient } from '../helpers/setup-http-client';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { getClient } from '../shared/supabase';
+import { EmailTransporter } from '../helpers/Email-transporter';
 
 export const container = new Container();
 
@@ -54,6 +54,9 @@ container.bind(TYPES.Social_Media.router).to(SocialMediaRouter);
 
 // setup server
 container.bind<IServer>(TYPES.Server).to(Server);
+
+// setup helpers
+container.bind<EmailTransporter>(TYPES.helpers.email).to(EmailTransporter);
 
 // setup another dependencies
 container.bind<AxiosInstance>(TYPES.client.http).toDynamicValue(() => setupHttpClient());

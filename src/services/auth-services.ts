@@ -1,20 +1,22 @@
 import axios from 'axios';
 import querystring from 'querystring';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import type { NextFunction } from 'express';
 import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { TokenHandler } from '../middleware/token-handler';
-import { TABLES } from '../shared/constants'
+import { TABLES, TYPES } from '../shared/constants';
 
 @injectable()
 export class AuthServices extends ServerConfig {
+  private readonly transporter: EmailTransporter;
   protected discordClientId: string;
   protected discordClientSecret: string;
   protected redirectUri: string;
 
-  constructor() {
+  constructor(@inject(TYPES.helpers.email) _transporter: EmailTransporter) {
     super();
+    this.transporter = _transporter;
     this.discordClientId = this.getEnvVar('DISCORD_CLIENT_ID');
     this.discordClientSecret = this.getEnvVar('DISCORD_TOKEN');
     this.redirectUri = this.getEnvVar('FRONTEND_REDIRECT_URI');
@@ -61,25 +63,24 @@ export class AuthServices extends ServerConfig {
   }
 
   async checkBan(id: string) {
+    TYPES;
     let status;
     return await axios
       .get(`https://discord.com/api/v9/guilds/1086689618197483540/bans/${id}`, {
         headers: {
           Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
         },
-        validateStatus: status => status === 404,
+        validateStatus: (status) => status === 404,
       })
       .then(() => {
         status = false;
         return status;
       })
-      .catch(err => {
+      .catch((err) => {
         status = true;
         return status;
       });
   }
-
-  // Creo que esto seria una utilidad
   getRedirectUri() {
     return this.redirectUri;
   }
@@ -89,8 +90,7 @@ export class AuthServices extends ServerConfig {
   }
 
   async sendToken(email: string, id: string) {
-    const transporter = EmailTransporter.useTransport();
-    return await transporter.sendEmail(email);
+    return await this.transporter.sendEmail(email);
   }
 
   async saveOne(email: string, id: string, token: any) {
@@ -166,6 +166,10 @@ export class AuthServices extends ServerConfig {
   }
 
   async setUserData(userRole: string, id: string) {
-    return await this.supabaseClient.from(TABLES.DISCORD_USER).update({ role: userRole, verified: true }).eq('discord_id', id).select();
+    return await this.supabaseClient
+      .from(TABLES.DISCORD_USER)
+      .update({ role: userRole, verified: true })
+      .eq('discord_id', id)
+      .select();
   }
 }
