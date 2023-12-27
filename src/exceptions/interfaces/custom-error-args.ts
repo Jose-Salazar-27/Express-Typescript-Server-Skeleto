@@ -2,7 +2,7 @@ import { HttpCodes } from '../custom-error';
 
 export interface ErrorArgs {
   name?: string;
-  httpCode: HttpCodes;
+  httpCode: number;
   description: string;
   isOperational?: boolean;
 }
