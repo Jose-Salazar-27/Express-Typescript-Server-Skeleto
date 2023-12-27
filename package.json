@@ -7,7 +7,7 @@
     "start:dev": "NODE_ENV=development nodemon src/index.ts",
     "clean": "rm -rf dist/",
     "copypaste": "cp .env.production dist/",
-    "start": "pnpm clean && pnpm build && pnpm copypaste && NODE_ENV=production node dist/src/index.js",
+    "start": "npm clean && npm build && npm copypaste && NODE_ENV=production node dist/src/index.js",
     "debugg": "tsc && nodemon dist/src/index.js",
     "build:test": "tsc --project tsconfig.build.json",
     "build": "tsc",
