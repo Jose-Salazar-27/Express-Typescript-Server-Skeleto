@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
 RUN npm install -g ts-node
 
@@ -64,4 +64,4 @@ ENV LEGEND_GA=$LEGEND_GA
 
 EXPOSE 8000
 
-CMD ["npm", "start"]
+CMD ["npm", "start:deploy"]
