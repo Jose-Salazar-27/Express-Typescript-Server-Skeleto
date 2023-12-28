@@ -64,4 +64,4 @@ ENV LEGEND_GA=$LEGEND_GA
 
 EXPOSE 8000
 
-CMD ["npm", "start:deploy"]
+CMD ["npm", "run","start:deploy"]
