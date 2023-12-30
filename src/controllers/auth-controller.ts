@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
 import axios, { AxiosResponse } from 'axios';
+import querystring from 'querystring';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
@@ -154,13 +155,20 @@ export class AuthController {
       // const clientId = 1402923880314690;
       // const redirectUri = 'https://tiento-server-on-render.onrender.com/api/auth/ig';
 
-      // const response = await axios.get(
-      //   `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user_profile,user_media&response_type=code`
-      // );
+      const data = {
+        client_id: 1402923880314690,
+        client_secret: '89c4952d71ba25a1c8f89f62fc38075d',
+        grant_type: 'authorization_code',
+        redirect_uri: 'https://tiento-server-on-render.onrender.com/api/auth/ig',
+        code: req.query.code as string,
+      };
 
-      const result = { query: req.query, body: req.body };
+      // get access token
+      const resutl = await axios.post('https://api.instagram.com/oauth/access_token', data, {
+        headers: { 'content-type': 'application/x-www-form-urlencoded' }, //make sure to set this request as url enconded
+      });
 
-      res.send(result);
+      return res.send(resutl.data.access_token);
     } catch (error) {
       res.send(error);
     }
