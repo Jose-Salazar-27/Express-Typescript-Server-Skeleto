@@ -5,6 +5,7 @@ import querystring from 'querystring';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
+import { readToken, writeToken } from '../helpers/token-utils';
 
 @injectable()
 export class AuthController {
@@ -168,7 +169,9 @@ export class AuthController {
         headers: { 'content-type': 'application/x-www-form-urlencoded' }, //make sure to set this request as url enconded
       });
 
-      return res.send(resutl.data.access_token);
+      writeToken(resutl.data.access_token);
+
+      return res.send('got token: ' + readToken());
     } catch (error) {
       res.send(error);
     }
