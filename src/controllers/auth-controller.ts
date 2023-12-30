@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
@@ -145,6 +145,24 @@ export class AuthController {
       res.status(201).json({ result });
     } catch (err) {
       next(err);
+    }
+  }
+
+  async getInstagramToken(req: Request, res: Response) {
+    try {
+      // todo: delete these constanst later
+      // const clientId = 1402923880314690;
+      // const redirectUri = 'https://tiento-server-on-render.onrender.com/api/auth/ig';
+
+      // const response = await axios.get(
+      //   `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user_profile,user_media&response_type=code`
+      // );
+
+      const result = { query: req.query, body: req.body };
+
+      res.send(result);
+    } catch (error) {
+      res.send(error);
     }
   }
 }
