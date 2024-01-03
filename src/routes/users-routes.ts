@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { inject, injectable } from "inversify";
-import { IAuthorizer, IUserController } from "../dependency-injection";
-import { TYPES } from "../shared/constants/identifiers";
+import { Router } from 'express';
+import { inject, injectable } from 'inversify';
+import { IAuthorizer, IUserController } from '../dependency-injection';
+import { TYPES } from '../shared/constants/identifiers';
 
 @injectable()
 export class UserRouter {
@@ -21,19 +21,13 @@ export class UserRouter {
 
   public initRoutes(): void {
     // this.router.get('/messages', (req, res) => this.controller.getPosts(req, res));
-    this.router.get(
-      "/role",
-      (req, res, next) => this.middleware.authorize(req, res, next),
-      (req, res) => this.controller.getUserRole(req, res)
-    );
+    this.router.get('/role', (req, res, next) => this.middleware.authorize(req, res, next));
     this.router.post(
-      "/messages",
+      '/messages',
       (req, res, next) => this.middleware.authorize(req, res, next),
       (req, res) => this.controller.messagesByRole(req, res)
     );
-    this.router.get("/giveaways/:level", (req, res) =>
-      this.controller.getGiveAways(req, res)
-    );
+    this.router.get('/giveaways/:level', (req, res) => this.controller.getGiveAways(req, res));
   }
 
   public getRouter(): Router {
