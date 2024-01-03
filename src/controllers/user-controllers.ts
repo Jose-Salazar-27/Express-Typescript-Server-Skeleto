@@ -32,7 +32,7 @@ export class UserController {
     try {
       const username = req.body.username as string;
       const role = await this.service.getUserRole(username);
-      const g = await this.service.getGAByRole(role[0]);
+      const g = await this.service.getGiveAwayByRole(role[0]);
       res.send(g);
     } catch (err) {
       res.send(err);

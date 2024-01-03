@@ -1,9 +1,6 @@
-import axios from "axios";
-import "reflect-metadata";
-import { inject, injectable } from "inversify";
-import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
-import { UserRepository } from "../repositories/user-repository";
-import { TYPES } from "../shared/constants/identifiers";
+import { inject, injectable } from 'inversify';
+import { UserRepository } from '../repositories/user-repository';
+import { TYPES } from '../shared/constants/identifiers';
 
 const RoleLevel = {
   tryout: 1,
@@ -12,26 +9,14 @@ const RoleLevel = {
   legend: 4,
 };
 
-interface Levels {
-  tryout: number;
-  academy: number;
-  first_team: number;
-  legend: number;
-}
-
 @injectable()
-export class UserService extends ConstraintsConfigurator {
+export class UserService {
   public readonly repository: UserRepository;
   constructor(
     @inject(TYPES.UserRepository)
     _repository: UserRepository
   ) {
-    super();
     this.repository = _repository;
-  }
-
-  getRoles() {
-    return this.roles;
   }
 
   public async getUserRole(username: string) {
@@ -42,11 +27,8 @@ export class UserService extends ConstraintsConfigurator {
   }
 
   async messagesByRole(roleName: string, level: string) {
-    const user_level = RoleLevel[roleName as keyof Levels];
-    const requested_level = RoleLevel[level as keyof Levels];
-
-    console.log(`USER LEVEL ${user_level}`);
-    console.log(`REQUESTED LEVEL ${requested_level}`);
+    const user_level = RoleLevel[roleName as keyof object];
+    const requested_level = RoleLevel[level as keyof object];
 
     if (user_level < requested_level) {
       return null;
@@ -56,7 +38,7 @@ export class UserService extends ConstraintsConfigurator {
   }
 
   // TEMPORALMENTE VOY A USAR GA para referirme a los give aways
-  public async getGAByRole(role: string) {
-    return await this.repository.getGAByRole(role);
+  public async getGiveAwayByRole(role: string) {
+    return await this.repository.getGiveAwayByRole(String(role));
   }
 }
