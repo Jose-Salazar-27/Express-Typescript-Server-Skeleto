@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
-import axios, { AxiosResponse } from 'axios';
+import axios, { AxiosResponse, HttpStatusCode } from 'axios';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
 import { readToken, writeToken } from '../helpers/token-utils';
+import { getEnv } from '../helpers/getenv';
 
 @injectable()
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
 
       res.redirect(discordOAuthUrl);
     } catch (err) {
-      res.status(500).json({ err });
+      res.status(HttpStatusCode.InternalServerError).json({ err });
     }
   }
 
@@ -45,8 +46,7 @@ export class AuthController {
 
       const query = await this.service.findUserById(id);
 
-      // TODO: mover esta funcion de token al tokenHandler
-      const token = jwt.sign({ data: accessToken }, 'mySecret', { expiresIn: '5m' });
+      const token = jwt.sign({ data: accessToken }, getEnv('JWT_KEY'), { expiresIn: '5m' });
 
       if (query.data?.length && query.data[0].verified) {
         res.redirect(redirectUri + `/dashboard?t=${token}`);
@@ -54,19 +54,18 @@ export class AuthController {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(HttpStatusCode.InternalServerError).json({ error });
     }
   }
 
   async user(req: any, res: Response) {
     const token = req.token as string;
     try {
-      // TODO: mover esta funcion de token al tokenHandler
-      const accessToken = jwt.verify(token, 'mySecret') as { data: string };
+      const accessToken = jwt.verify(token, getEnv('JWT_KEY')) as { data: string };
       const user = await this.service.getDiscordUser(accessToken.data);
       res.json(user);
     } catch (error) {
-      res.status(500).json({ error });
+      res.status(HttpStatusCode.InternalServerError).json({ error });
     }
   }
 
@@ -77,10 +76,10 @@ export class AuthController {
 
       if (emailExist) {
         const updateResult = await this.service.updateOne(email, emailStatus.code!);
-        res.status(200).json({ result: updateResult });
+        res.status(HttpStatusCode.Ok).json({ result: updateResult });
       } else {
         const saveStatus = await this.service.saveOne(email, id, emailStatus.code);
-        res.status(200).json({
+        res.status(HttpStatusCode.Ok).json({
           payload: {
             emailStatus,
             saveStatus,
@@ -88,11 +87,10 @@ export class AuthController {
         });
       }
     } catch (err) {
-      res.status(400).json({ err });
+      res.status(HttpStatusCode.BadRequest).json({ err });
     }
   }
 
-  // TODO: IMPLEMENTAR UNA INTERFAZ CUSTOMREQUEST PARA ESTOS 3
   async verifyCode(req: any, res: Response, next: NextFunction) {
     try {
       const { code } = req.body;
@@ -108,10 +106,10 @@ export class AuthController {
           next();
         }
       } else {
-        res.status(422).json({ err: 'code in valid' });
+        res.status(HttpStatusCode.UnprocessableEntity).json({ err: 'code in valid' });
       }
     } catch (err) {
-      res.status(500).json({ err });
+      res.status(HttpStatusCode.InternalServerError).json({ err });
     }
   }
 
@@ -130,7 +128,9 @@ export class AuthController {
         if (isValid) {
           next();
         } else {
-          res.status(500).json({ err: 'At this moment, we cannnot process your request' });
+          res
+            .status(HttpStatusCode.InternalServerError)
+            .json({ err: 'At this moment, we cannnot process your request' });
         }
       }
     } catch (err) {
@@ -143,7 +143,7 @@ export class AuthController {
       const { discord_id } = req.payload;
       const result = await this.service.setUserData('@everyone', discord_id);
 
-      res.status(201).json({ result });
+      res.status(HttpStatusCode.Created).json({ result });
     } catch (err) {
       next(err);
     }
@@ -151,10 +151,7 @@ export class AuthController {
 
   async getInstagramToken(req: Request, res: Response, next: NextFunction) {
     try {
-      // todo: delete these constanst later
-      // const clientId = 1402923880314690;
-      // const redirectUri = 'https://tiento-server-on-render.onrender.com/api/auth/ig';
-
+      // TODO: remove this to .env
       const data = {
         client_id: 1402923880314690,
         client_secret: '89c4952d71ba25a1c8f89f62fc38075d',

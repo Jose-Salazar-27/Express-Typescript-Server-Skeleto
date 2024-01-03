@@ -1,8 +1,9 @@
 import { UserService } from '../services/user-services';
 import { Request, Response } from 'express';
-import { HttpCodes } from '../exceptions/custom-error';
+import { HttpCodes, HttpException } from '../exceptions/custom-error';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../shared/constants/identifiers';
+import { HttpStatusCode } from 'axios';
 
 @injectable()
 export class UserController {
@@ -17,14 +18,14 @@ export class UserController {
       const result = await this.service.messagesByRole(role_name, level);
 
       if (result === null) {
-        res.status(HttpCodes.FORBBIDEN).json({ err: 'Not allowed for your role' });
+        res.status(HttpStatusCode.Forbidden).json({ err: 'Not allowed for your role' });
         return;
       }
 
-      res.status(200).json({ result });
+      res.status(HttpStatusCode.Ok).json({ result });
     } catch (err) {
       console.log(err);
-      res.send(err);
+      throw new HttpException({ context: { err } });
     }
   }
 
@@ -35,7 +36,7 @@ export class UserController {
       const g = await this.service.getGiveAwayByRole(role[0]);
       res.send(g);
     } catch (err) {
-      res.send(err);
+      throw new HttpException({ context: { err } });
     }
   }
 }
