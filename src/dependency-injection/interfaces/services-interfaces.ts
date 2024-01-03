@@ -10,6 +10,6 @@ export interface IUserService<T = DiscordMessage> {
 }
 
 export interface ISocialMediaService {
-  getInstagramPhotos(): string[];
+  getInstagramPhotos(): Promise<string[]>;
   getDiscordNews(limit: number): Promise<CommunityMessage[]>;
 }

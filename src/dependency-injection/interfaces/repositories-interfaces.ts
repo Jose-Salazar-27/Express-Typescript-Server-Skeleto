@@ -9,6 +9,6 @@ export interface IUserRepository<T = TDiscordUser, D = DiscordMessage> {
 }
 
 export interface ISocialMediaRepository {
-  getInstagramPhoto(index: number): string;
+  getInstagramPhoto(token: string): Promise<AxiosResponse>;
   getDiscordNews(limit: number): Promise<any[]>;
 }

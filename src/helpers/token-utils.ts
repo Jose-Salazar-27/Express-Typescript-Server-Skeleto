@@ -1,11 +1,14 @@
 import { writeFileSync, readFileSync } from 'fs';
+import { HttpException } from '../exceptions/custom-error';
+import { HttpStatusCode } from 'axios';
+import { NextFunction } from 'express';
 
-export const writeToken = (token: string): void => {
+export const writeToken = (token: string, fn: NextFunction): void => {
   try {
-    writeFileSync('token.txt', token, 'utf8');
+    writeFileSync('token2.txt', token, 'utf8');
   } catch (error) {
     console.log(error);
-    // notify that operation was failed
+    fn(error);
   }
 };
 
