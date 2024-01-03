@@ -6,6 +6,8 @@ import { ServerConfig } from '../config/server-config';
 import { EmailTransporter } from '../helpers/Email-transporter';
 import { TokenHandler } from '../middleware/token-handler';
 import { TABLES, TYPES } from '../shared/constants';
+import { discordRolesId, guildId } from '../shared/constants/discord';
+import { getEnv } from '../helpers/getenv';
 
 @injectable()
 export class AuthServices extends ServerConfig {
@@ -45,14 +47,14 @@ export class AuthServices extends ServerConfig {
       scope: 'identify email',
     };
 
-    const response = await axios.post('https://discord.com/api/oauth2/token', querystring.stringify(data), {
+    const response = await axios.post('https://discord.com/api/oauth2/token', data, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
     return response.data.access_token;
   }
 
-  async getDiscordUser(accessToken: any) {
+  async getDiscordUser(accessToken: string) {
     const response = await axios.get('https://discord.com/api/users/@me', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -63,23 +65,15 @@ export class AuthServices extends ServerConfig {
   }
 
   async checkBan(id: string) {
-    TYPES;
-    let status;
     return await axios
-      .get(`https://discord.com/api/v9/guilds/1086689618197483540/bans/${id}`, {
+      .get(`https://discord.com/api/v9/guilds/${guildId}/bans/${id}`, {
         headers: {
-          Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
+          Authorization: `Bot ${getEnv('BOT_TOKEN')}`,
         },
         validateStatus: (status) => status === 404,
       })
-      .then(() => {
-        status = false;
-        return status;
-      })
-      .catch((err) => {
-        status = true;
-        return status;
-      });
+      .then(() => false)
+      .catch((err) => true);
   }
   getRedirectUri() {
     return this.redirectUri;
@@ -94,7 +88,6 @@ export class AuthServices extends ServerConfig {
   }
 
   async saveOne(email: string, id: string, token: any) {
-    // console.log('==== RECEIVED ID: ' + id);
     const now = new Date();
     const expirationDate = new Date(new Date().getTime() + 5 * 60000);
 
@@ -122,24 +115,22 @@ export class AuthServices extends ServerConfig {
       .eq('email', email);
   }
 
-  async insertUserInDiscord(jwt: any, id: string, next: NextFunction) {
-    // TODO: fix this any
-    const access_token: any = TokenHandler.getMiddleware().decodeJWT(jwt);
+  async insertUserInDiscord(jwt: string, id: string, next: NextFunction) {
+    const access_token = <any>TokenHandler.getMiddleware().decodeJWT(jwt);
 
     try {
       const result = await axios.put(
-        `https://discord.com/api/v9/guilds/1086689618197483540/members/${id}`,
-        { access_token: access_token?.data, roles: ['1096218689495371817'] },
+        `https://discord.com/api/v9/guilds/${guildId}/members/${id}`,
+        { access_token: access_token?.data, roles: [discordRolesId.tryout] }, // ? I'm not sure if tryout will be the initial role
         {
           headers: {
-            Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
+            Authorization: `Bot ${getEnv('BOT_TOKEN')}`,
           },
         }
       );
 
       return result;
     } catch (err) {
-      console.log(err);
       next(err);
     }
   }
