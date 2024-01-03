@@ -1,17 +1,14 @@
-import { getEnv } from '../../helpers/getenv';
-
-// these channels id should be replaced when bot migrates to official tiento's discord
 export const discordChannelsId = Object.freeze({
-  announcemets: '1186290930647584800',
-  news: '1186291943861399572',
-  updates: '1186291979051614288',
+  announcemets: '1009436850718507109',
+  news: '1009436869680971887',
+  updates: '1009436888534368397',
 });
 
 export const discordRolesId = Object.freeze({
-  tryout: '1096218689495371817',
-  academy: '1102940195281707158',
-  first_team: '1096218638589104138',
-  legend: '1096218340210520074',
+  tryout: '1009431608715137054',
+  academy: '1009431608127914095',
+  first_team: '1009431607167426612',
+  legend: '1009431606987083846',
 });
 
-export const guildId = '1086689618197483540';
+export const guildId = '1009430885117992980';
