@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { inject, injectable } from 'inversify';
 import axios, { AxiosResponse } from 'axios';
-import querystring from 'querystring';
 import { NextFunction, Request, Response } from 'express';
 import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
@@ -150,7 +149,7 @@ export class AuthController {
     }
   }
 
-  async getInstagramToken(req: Request, res: Response) {
+  async getInstagramToken(req: Request, res: Response, next: NextFunction) {
     try {
       // todo: delete these constanst later
       // const clientId = 1402923880314690;
@@ -165,13 +164,13 @@ export class AuthController {
       };
 
       // get access token
-      const resutl = await axios.post('https://api.instagram.com/oauth/access_token', data, {
+      const result = await axios.post('https://api.instagram.com/oauth/access_token', data, {
         headers: { 'content-type': 'application/x-www-form-urlencoded' }, //make sure to set this request as url enconded
       });
 
-      writeToken(resutl.data.access_token);
+      writeToken(result.data.access_token, next);
 
-      return res.send('got token: ' + readToken());
+      return res.send('Token updated successfully. You can close this window');
     } catch (error) {
       res.send(error);
     }
