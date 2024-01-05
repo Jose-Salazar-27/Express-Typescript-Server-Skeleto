@@ -34,10 +34,6 @@ export class AuthRouter {
       (req, res, next) => this.controller.searchInDiscord(req, res, next),
       (req, res, next) => this.controller.setUserData(req, res, next)
     );
-    this.router.get('/instagram', (req, res) => {
-      console.log(req.query);
-      return;
-    });
   }
 
   getRouter() {
