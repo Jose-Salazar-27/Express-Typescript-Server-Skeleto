@@ -1,6 +1,6 @@
 import { UserService } from '../services/user-services';
 import { Request, Response } from 'express';
-import { HttpCodes, HttpException } from '../exceptions/custom-error';
+import { HttpException } from '../exceptions/custom-error';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../shared/constants/identifiers';
 import { HttpStatusCode } from 'axios';
@@ -14,8 +14,8 @@ export class UserController {
 
   async messagesByRole(req: Request, res: Response) {
     try {
-      const { role_name, level } = req.body;
-      const result = await this.service.messagesByRole(role_name, level);
+      const { userLevel, level, role } = req.body;
+      const result = await this.service.messagesByRole(level, userLevel);
 
       if (result === null) {
         res.status(HttpStatusCode.Forbidden).json({ err: 'Not allowed for your role' });

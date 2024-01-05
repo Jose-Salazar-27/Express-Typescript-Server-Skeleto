@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { UserRepository } from '../repositories/user-repository';
 import { TYPES } from '../shared/constants/identifiers';
+import { getGuildName } from '../helpers/discord-utils';
 
 const RoleLevel = {
   tryout: 1,
@@ -26,14 +27,19 @@ export class UserService {
     return role;
   }
 
-  async messagesByRole(roleName: string, level: string) {
-    const user_level = RoleLevel[roleName as keyof object];
-    const requested_level = RoleLevel[level as keyof object];
+  async messagesByRole(requestLevel: string, userLevel: number) {
+    const requested_level = RoleLevel[requestLevel as keyof object];
 
-    if (user_level < requested_level) {
+    // if requested level is lower that user role, reject the request
+    if (userLevel < requested_level) {
       return null;
     } else {
-      return await this.repository.messagesByRole(level);
+      const rawMessages = await this.repository.messagesByRole(requestLevel);
+      // return only relevant info
+      return rawMessages.map((msg) => {
+        const { author, channel_id, content, timestamp } = msg;
+        return { author: author.username, channel_name: getGuildName(channel_id), content, timestamp };
+      });
     }
   }
 

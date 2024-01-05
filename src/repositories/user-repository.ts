@@ -18,15 +18,15 @@ export class UserRepository {
     return this.httpClient.get(`/guilds/${guildId}/members/search?query=${username}`);
   }
 
-  public async messagesByRole(role: string) {
+  public async messagesByRole(level: string) {
     const rolesMap = {
-      [RoleNames.LEGEND]: `/channels/${discordChannelsId.legend}/messages`,
-      [RoleNames.FIRST_TEAM]: `/channels/${discordChannelsId.firstTeam}/messages`,
-      [RoleNames.ACADEMY]: `/channels/${discordChannelsId.academy}/messages`,
-      [RoleNames.TRYOUT]: `/channels/${discordChannelsId.tryout}/messages`,
+      tryout: `/channels/${discordChannelsId.giveAway.tryout}/messages`,
+      academy: `/channels/${discordChannelsId.giveAway.academy}/messages`,
+      first_team: `/channels/${discordChannelsId.giveAway.first_team}/messages`,
+      legend: `/channels/${discordChannelsId.giveAway.legend}/messages`,
     };
 
-    const messageUrl = rolesMap[role as keyof RoleNamesIndice];
+    const messageUrl = rolesMap[level as keyof object];
     const response = await this.httpClient.get<DiscordMessage[]>(messageUrl);
 
     return response.data;

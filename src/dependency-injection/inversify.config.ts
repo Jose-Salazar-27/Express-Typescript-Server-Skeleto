@@ -5,14 +5,11 @@ import { UserRepository } from '../repositories/user-repository';
 import { UserService } from '../services/user-services';
 import { MainRouter } from '../routes';
 import type { IRouter, IUserRouter } from './interfaces/routers-interfaces';
-import type { IUserController } from './interfaces/controller-interfaces';
-import type { IUserService } from './interfaces/services-interfaces';
 import { ISocialMediaRepository, type IUserRepository } from './interfaces/repositories-interfaces';
 import { UserRouter } from '../routes/users-routes';
 import type { IServer } from './interfaces/server-interface';
 import { Server } from '../server';
 import { UserController } from '../controllers/user-controllers';
-import type { IAuthorizer } from './interfaces/middleware-interfaces';
 import { Authorizer } from '../middleware/authorizer';
 import { AuthServices } from '../services/auth-services';
 import { AuthController } from '../controllers/auth-controller';
@@ -30,20 +27,20 @@ import { EmailTransporter } from '../helpers/Email-transporter';
 export const container = new Container();
 
 // setup middlewares
-container.bind<IAuthorizer>(TYPES.Authorizer).to(Authorizer);
+container.bind<Authorizer>(TYPES.Authorizer).to(Authorizer);
 
 // setup controllers
-container.bind<IUserController>(TYPES.UserController).to(UserController);
+container.bind<UserController>(TYPES.UserController).to(UserController);
 container.bind(TYPES.Auth.controller).to(AuthController);
 container.bind(TYPES.Social_Media.controller).to(SocialMediaController);
 
 // setup services
-container.bind<IUserService>(TYPES.UserService).to(UserService);
+container.bind<UserService>(TYPES.UserService).to(UserService);
 container.bind(TYPES.Auth.service).to(AuthServices);
 container.bind(TYPES.Social_Media.service).to(SocialMediaService);
 
 // setup repositories
-container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
+container.bind<UserRepository>(TYPES.UserRepository).to(UserRepository);
 container.bind<ISocialMediaRepository>(TYPES.Social_Media.repository).to(SocialMediaRepository);
 
 // setup routers

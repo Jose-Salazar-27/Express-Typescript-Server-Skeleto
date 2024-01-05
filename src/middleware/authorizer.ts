@@ -7,7 +7,7 @@ import { TYPES } from '../shared/constants/identifiers';
 import { ErrorMessages } from '../helpers/error-messages';
 import { IDiscordUser } from '../models/discord-user-model';
 import { getEnv } from '../helpers/getenv';
-import { discordRolesId, guildId } from '../shared/constants/discord';
+import { discordRolesId, guildId, levelTable, roleTable } from '../shared/constants/discord';
 
 @injectable()
 export class Authorizer {
@@ -20,28 +20,39 @@ export class Authorizer {
   async authorize(req: Request, res: Response, next: NextFunction) {
     const username = req.body.username as string;
 
-    const role = await this.service.getUserRole(username);
+    const roles = await this.service.getUserRole(username);
 
-    const roleName = this.setRoleName(role[0]);
-    if (roleName === undefined) {
+    const result = this.setRoleName(roles);
+    if (result === undefined) {
       res.status(HttpStatusCode.BadRequest).json({ err: 'must provide a valid role' });
     }
 
-    req.body.role_name = roleName;
+    req.body.role = result.roleId;
+    req.body.userLevel = result.level;
     next();
   }
 
-  public setRoleName(role: string) {
-    const roleNames: { [key: string]: string } = {
-      [discordRolesId.tryout]: 'tryout',
-      [discordRolesId.academy]: 'academy',
-      [discordRolesId.first_team]: 'first_team',
-      [discordRolesId.legend]: 'legend',
-    };
-
-    return roleNames[role as keyof Object];
+  public setRoleName(userRoles: string[]) {
+    const roles = <string[]>Object.values(discordRolesId);
+    const currentRoles = userRoles.filter((role) => roles.includes(role));
+    return evaluateRoles(currentRoles);
   }
 }
+
+export const evaluateRoles = (arr: string[]) => {
+  let defaultLevel = 1;
+  let roleId = '';
+
+  for (let index = 0; index < arr.length; index++) {
+    let currentRole = levelTable[arr[index] as keyof object];
+    if (currentRole > defaultLevel) {
+      defaultLevel = currentRole;
+      roleId = Object.keys(roleTable)[index];
+    }
+    continue;
+  }
+  return { level: defaultLevel, roleId };
+};
 
 export const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   // validate request body
