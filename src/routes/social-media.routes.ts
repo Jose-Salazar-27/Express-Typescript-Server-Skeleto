@@ -18,7 +18,7 @@ export class SocialMediaRouter {
 
   public initRoutes(): void {
     this.router.get('/instagram', (req, res) => this.controller.getInstagramPhotos(req, res));
-    this.router.get('/discord', verifyAuth, (req, res) => this.controller.getDiscordNews(req, res));
+    this.router.post('/discord', verifyAuth, (req, res) => this.controller.getDiscordNews(req, res));
   }
 
   public getRouter() {
