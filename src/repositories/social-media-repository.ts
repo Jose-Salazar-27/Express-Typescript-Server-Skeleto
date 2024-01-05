@@ -1,10 +1,7 @@
 import { inject, injectable } from 'inversify';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { PublicUrlResponse } from '../models/supabase-response';
-import { HttpCodes, HttpException } from '../exceptions/custom-error';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import { TYPES, buckets } from '../shared/constants';
-import { DiscordMessage } from '../models/discord-messages-model';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { discordChannelsId } from '../shared/constants/discord';
 
 @injectable()
