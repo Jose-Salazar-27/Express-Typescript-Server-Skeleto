@@ -1,9 +1,0 @@
-name: my-express-app
-services:
-  web:
-    build: .
-    env:
-      PORT: 8000
-      SUPABASE_URL: https://oszvkemeojwtevviwzfb.supabase.co
-      SUPABASE_PUBLIC_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zenZrZW1lb2p3dGV2dml3emZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODAxMzM1MzEsImV4cCI6MTk5NTcwOTUzMX0.fB0O5UJDTCazVjzLislEYxFLsMPToOJbVZevORJ73Rw
-      SUPABASE_KEY_SERVICE_ROLE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zenZrZW1lb2p3dGV2dml3emZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY4MDEzMzUzMSwiZXhwIjoxOTk1NzA5NTMxfQ.xbRwfdu_u3HXTsfYTC5VePn_8FqXuWN6mju5UBUQkt8
