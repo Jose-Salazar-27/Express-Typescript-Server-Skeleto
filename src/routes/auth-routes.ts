@@ -20,7 +20,7 @@ export class AuthRouter {
     this.router.get('/discord', (req, res) => this.controller.discord(req, res));
     this.router.get('/discord/callback', (req, res) => this.controller.discordCallback(req, res));
     this.router.get('/user', (req, res) => this.controller.user(req, res));
-    this.router.get('/ig', (req, res) => this.controller.getInstagramToken(req, res));
+    this.router.get('/ig', (req, res, next) => this.controller.getInstagramToken(req, res, next));
 
     this.router.post(
       '/verify',
@@ -34,10 +34,6 @@ export class AuthRouter {
       (req, res, next) => this.controller.searchInDiscord(req, res, next),
       (req, res, next) => this.controller.setUserData(req, res, next)
     );
-    this.router.get('/instagram', (req, res) => {
-      console.log(req.query);
-      return;
-    });
   }
 
   getRouter() {

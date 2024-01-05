@@ -9,6 +9,9 @@ interface RoleSet {
   legend: string;
 }
 
+/* 
+  @deprecated this not longer maintained   
+*/
 export abstract class ConstraintsConfigurator extends ServerConfig {
   public roles: RoleSet;
   public channels: RoleSet;

@@ -7,6 +7,7 @@ import { HttpException } from '../exceptions/custom-error';
 import { DiscordMessage } from '../models/discord-messages-model';
 import { discordErrors } from '../exceptions/messages';
 import { CommunityMessage, PromiseAllResult } from '../shared/types';
+import { readToken } from '../helpers/token-utils';
 
 @injectable()
 export class SocialMediaService {
@@ -16,22 +17,21 @@ export class SocialMediaService {
     this.repository = _repo;
   }
 
-  public getInstagramPhotos(): string[] {
-    const urls = [];
-    for (let index = 0; index <= 5; index++) {
-      const currentUrl = this.repository.getInstagramPhoto(index);
-      urls[index] = currentUrl;
+  public async getInstagramPhotos(): Promise<string[]> {
+    const result = await this.repository.getInstagramPhoto(readToken());
+
+    if (result.status !== HttpStatusCode.Ok) {
+      throw new HttpException({ code: result.status, message: result.statusText, context: result.data });
     }
-    return urls;
+
+    return result.data.data;
   }
 
   // I'm not sure if I should to adapt message date to current user local date. Can be do on future phases
   public async getDiscordNews(limit: number): Promise<CommunityMessage[]> {
     try {
       // fetch messages from discord servers
-      const rawMessages = <PromiseAllResult<AxiosResponse>[]>(
-        await this.repository.getDiscordNews(limit)
-      );
+      const rawMessages = <PromiseAllResult<AxiosResponse>[]>await this.repository.getDiscordNews(limit);
       // clean promise wrapper an merge response arrays
       const messages = rawMessages
         .filter((response) => response.status === 'fulfilled')

@@ -5,7 +5,6 @@ export interface IUserController {
   readonly service: IUserService;
   messagesByRole(req: Request, res: Response): Promise<void>;
   getGiveAways(req: Request, res: Response): Promise<void>;
-  getUserRole(req: any, res: Response): Promise<void>;
 }
 
 export interface ISocialMediaController {

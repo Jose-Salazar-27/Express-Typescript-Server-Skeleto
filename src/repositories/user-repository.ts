@@ -1,66 +1,47 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { injectable } from "inversify";
-import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
-import { TDiscordUser } from "../models/discord-user-model";
-import { DiscordMessage } from "../models/discord-messages-model";
-import { RoleNames, RoleNamesIndice } from "../helpers/roles";
+import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
+import { inject, injectable } from 'inversify';
+import { TDiscordUser } from '../models/discord-user-model';
+import { DiscordMessage } from '../models/discord-messages-model';
+import { RoleNames, RoleNamesIndice } from '../helpers/roles';
+import { guildId, discordChannelsId } from '../shared/constants/discord';
+import { TYPES } from '../shared/constants';
+import { getEnv } from '../helpers/getenv';
 
 @injectable()
-export class UserRepository extends ConstraintsConfigurator {
+export class UserRepository {
   protected httpClient: AxiosInstance;
-  constructor() {
-    super();
-    this.httpClient = this.setHttpClient();
+  constructor(@inject(TYPES.client.http) _axios: AxiosInstance) {
+    this.httpClient = _axios;
   }
 
   public findRole(username: string): Promise<AxiosResponse<TDiscordUser>> {
-    return this.httpClient.get(
-      `/guilds/${this.guildId}/members/search?query=${username}`
-    );
+    return this.httpClient.get(`/guilds/${guildId}/members/search?query=${username}`);
   }
 
-  // returns  Promise<AxiosResponse<IDiscordUser[] | IDiscordUser>>
-  public async messagesByRole(role: string) {
+  public async messagesByRole(level: string) {
     const rolesMap = {
-      [RoleNames.LEGEND]: `/channels/${this.channels.legend}/messages`,
-      [RoleNames.FIRST_TEAM]: `/channels/${this.channels.first_team}/messages`,
-      [RoleNames.ACADEMY]: `/channels/${this.channels.academy}/messages`,
-      [RoleNames.TRYOUT]: `/channels/${this.channels.tryout}/messages`,
+      tryout: `/channels/${discordChannelsId.giveAway.tryout}/messages`,
+      academy: `/channels/${discordChannelsId.giveAway.academy}/messages`,
+      first_team: `/channels/${discordChannelsId.giveAway.first_team}/messages`,
+      legend: `/channels/${discordChannelsId.giveAway.legend}/messages`,
     };
 
-    const messageUrl = rolesMap[role as keyof RoleNamesIndice];
+    const messageUrl = rolesMap[level as keyof object];
     const response = await this.httpClient.get<DiscordMessage[]>(messageUrl);
 
     return response.data;
   }
 
-  // GA = GIVE AWAY
-  public async getGAByRole(role: string) {
-    const urls = {
-      [this.roles.legend]: `/channels/${this.giveAways.legend}/messages`,
-      [this.roles
-        .first_team]: `/channels/${this.giveAways.first_team}/messages`,
-      [this.roles.academy]: `/channels/${this.giveAways.academy}/messages`,
-      [this.roles.tryout]: `/channels/${this.giveAways.tryout}/messages`,
-    };
+  // make sure that role is string
+  public async getGiveAwayByRole(role: string) {
+    const ids = Object.keys(discordChannelsId.giveAway);
+    const index = ids.indexOf(role);
 
-    const url = urls[role];
-    if (!url) {
+    if (index < 0) {
       throw new Error(`Invalid role: ${role}`);
     }
 
-    const response: AxiosResponse<DiscordMessage[]> = await this.httpClient.get(
-      url
-    );
+    const response: AxiosResponse<DiscordMessage[]> = await this.httpClient.get(`/channels/${ids[index]}/messages`);
     return response.data;
-  }
-
-  setHttpClient(): AxiosInstance {
-    return axios.create({
-      baseURL: "https://discord.com/api/v9",
-      headers: {
-        Authorization: `Bot ${this.token}`,
-      },
-    });
   }
 }

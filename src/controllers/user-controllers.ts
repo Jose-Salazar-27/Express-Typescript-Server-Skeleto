@@ -1,9 +1,9 @@
-import { UserService } from "../services/user-services";
-import { Request, Response } from "express";
-import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
-import { HttpCodes } from "../exceptions/custom-error";
-import { inject, injectable } from "inversify";
-import { TYPES } from "../shared/constants/identifiers";
+import { UserService } from '../services/user-services';
+import { Request, Response } from 'express';
+import { HttpException } from '../exceptions/custom-error';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../shared/constants/identifiers';
+import { HttpStatusCode } from 'axios';
 
 @injectable()
 export class UserController {
@@ -14,20 +14,18 @@ export class UserController {
 
   async messagesByRole(req: Request, res: Response) {
     try {
-      const { role_name, level } = req.body;
-      const result = await this.service.messagesByRole(role_name, level);
+      const { userLevel, level, role } = req.body;
+      const result = await this.service.messagesByRole(level, userLevel);
 
       if (result === null) {
-        res
-          .status(HttpCodes.FORBBIDEN)
-          .json({ err: "Not allowed for your role" });
+        res.status(HttpStatusCode.Forbidden).json({ err: 'Not allowed for your role' });
         return;
       }
 
-      res.status(200).json({ result });
+      res.status(HttpStatusCode.Ok).json({ result });
     } catch (err) {
       console.log(err);
-      res.send(err);
+      throw new HttpException({ context: { err } });
     }
   }
 
@@ -35,21 +33,10 @@ export class UserController {
     try {
       const username = req.body.username as string;
       const role = await this.service.getUserRole(username);
-      const g = await this.service.getGAByRole(role[0]);
+      const g = await this.service.getGiveAwayByRole(role[0]);
       res.send(g);
     } catch (err) {
-      res.send(err);
-    }
-  }
-
-  // TODO: remove this
-  async getUserRole(req: any, res: Response) {
-    try {
-      const role = req.body.roleName;
-
-      res.send({ role });
-    } catch (err) {
-      res.send(err);
+      throw new HttpException({ context: { err } });
     }
   }
 }

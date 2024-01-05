@@ -1,9 +1,7 @@
-import axios from "axios";
-import "reflect-metadata";
-import { inject, injectable } from "inversify";
-import { ConstraintsConfigurator } from "../helpers/constraints-configurator";
-import { UserRepository } from "../repositories/user-repository";
-import { TYPES } from "../shared/constants/identifiers";
+import { inject, injectable } from 'inversify';
+import { UserRepository } from '../repositories/user-repository';
+import { TYPES } from '../shared/constants/identifiers';
+import { getGuildName } from '../helpers/discord-utils';
 
 const RoleLevel = {
   tryout: 1,
@@ -12,26 +10,14 @@ const RoleLevel = {
   legend: 4,
 };
 
-interface Levels {
-  tryout: number;
-  academy: number;
-  first_team: number;
-  legend: number;
-}
-
 @injectable()
-export class UserService extends ConstraintsConfigurator {
+export class UserService {
   public readonly repository: UserRepository;
   constructor(
     @inject(TYPES.UserRepository)
     _repository: UserRepository
   ) {
-    super();
     this.repository = _repository;
-  }
-
-  getRoles() {
-    return this.roles;
   }
 
   public async getUserRole(username: string) {
@@ -41,22 +27,24 @@ export class UserService extends ConstraintsConfigurator {
     return role;
   }
 
-  async messagesByRole(roleName: string, level: string) {
-    const user_level = RoleLevel[roleName as keyof Levels];
-    const requested_level = RoleLevel[level as keyof Levels];
+  async messagesByRole(requestLevel: string, userLevel: number) {
+    const requested_level = RoleLevel[requestLevel as keyof object];
 
-    console.log(`USER LEVEL ${user_level}`);
-    console.log(`REQUESTED LEVEL ${requested_level}`);
-
-    if (user_level < requested_level) {
+    // if requested level is lower that user role, reject the request
+    if (userLevel < requested_level) {
       return null;
     } else {
-      return await this.repository.messagesByRole(level);
+      const rawMessages = await this.repository.messagesByRole(requestLevel);
+      // return only relevant info
+      return rawMessages.map((msg) => {
+        const { author, channel_id, content, timestamp } = msg;
+        return { author: author.username, channel_name: getGuildName(channel_id), content, timestamp };
+      });
     }
   }
 
   // TEMPORALMENTE VOY A USAR GA para referirme a los give aways
-  public async getGAByRole(role: string) {
-    return await this.repository.getGAByRole(role);
+  public async getGiveAwayByRole(role: string) {
+    return await this.repository.getGiveAwayByRole(String(role));
   }
 }

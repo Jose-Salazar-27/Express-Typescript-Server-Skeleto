@@ -17,8 +17,8 @@ export class SocialMediaController extends BaseController {
 
   public getInstagramPhotos(req: Request, res: Response): void {
     try {
-      const urls = this.service.getInstagramPhotos();
-      res.status(HttpCodes.OK).json({ urls });
+      const payload = this.service.getInstagramPhotos();
+      res.status(HttpCodes.OK).json({ payload });
     } catch (error) {
       // throw empty exception casue has default values
       // and error type is unknow and typescript doesn't allow pass arguments to exception
