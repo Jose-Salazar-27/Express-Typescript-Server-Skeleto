@@ -9,9 +9,9 @@ export const discordChannelsId = Object.freeze({
   legend: '', //channel -> not defined yet
 
   giveAway: {
-    // tryout: '1096218689495371817', commented becasue tryout give away is not defined yet
+    tryout: '1009437570146517123', //channel general giveaways
     academy: '1009437642720550922',
-    firstTeam: '1009437701797326878',
+    first_team: '1009437701797326878',
     legend: '1009437762308538438',
   },
 });
@@ -22,5 +22,19 @@ export const discordRolesId = Object.freeze({
   first_team: '1009431607167426612',
   legend: '1009431606987083846',
 });
+
+export const roleTable = {
+  [discordChannelsId.giveAway.tryout]: 1,
+  [discordChannelsId.giveAway.academy]: 2,
+  [discordChannelsId.giveAway.first_team]: 3,
+  [discordChannelsId.giveAway.legend]: 4,
+};
+
+export const levelTable = {
+  [discordRolesId.tryout]: 1,
+  [discordRolesId.academy]: 2,
+  [discordRolesId.first_team]: 3,
+  [discordRolesId.legend]: 4,
+};
 
 export const guildId = '1009430885117992980';
