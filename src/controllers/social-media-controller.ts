@@ -3,8 +3,9 @@ import type { Request, Response } from 'express';
 import { ISocialMediaService } from '../dependency-injection';
 import { TYPES } from '../shared/constants';
 import { SocialMediaService } from '../services/social-media-service';
-import { HttpCodes, HttpException } from '../exceptions/custom-error';
+import { HttpException } from '../exceptions/custom-error';
 import { BaseController } from './base-controller';
+import { HttpStatusCode } from 'axios';
 
 @injectable()
 export class SocialMediaController extends BaseController {
@@ -18,7 +19,7 @@ export class SocialMediaController extends BaseController {
   public getInstagramPhotos(req: Request, res: Response): void {
     try {
       const payload = this.service.getInstagramPhotos();
-      res.status(HttpCodes.OK).json({ payload });
+      res.status(HttpStatusCode.Ok).json({ payload });
     } catch (error) {
       // throw empty exception casue has default values
       // and error type is unknow and typescript doesn't allow pass arguments to exception
