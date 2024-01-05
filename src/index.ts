@@ -7,7 +7,7 @@ const bootstrap = async (): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     dotenv.config({
       path:
-        process.env.NODE_ENV === 'production' ? `${__dirname}/../.env` : `${__dirname}/../.env.${process.env.NODE_ENV}`,
+        process.env.NODE_ENV === 'production' ? `${__dirname}/.env` : `${__dirname}/../.env.${process.env.NODE_ENV}`,
     });
     resolve();
   })
