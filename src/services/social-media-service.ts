@@ -8,6 +8,7 @@ import { DiscordMessage } from '../models/discord-messages-model';
 import { discordErrors } from '../exceptions/messages';
 import { CommunityMessage, PromiseAllResult } from '../shared/types';
 import { readToken } from '../helpers/token-utils';
+import { getGuildName } from '../helpers/discord-utils';
 
 @injectable()
 export class SocialMediaService {
@@ -43,6 +44,7 @@ export class SocialMediaService {
           author: msg.author.username,
           content: msg.content,
           date: new Date(msg.timestamp).toLocaleDateString('en-US'),
+          channel_name: getGuildName(msg.channel_id),
         };
       });
     } catch (error) {
