@@ -151,12 +151,11 @@ export class AuthController {
 
   async getInstagramToken(req: Request, res: Response, next: NextFunction) {
     try {
-      // TODO: remove this to .env
       const data = {
-        client_id: 1402923880314690,
-        client_secret: '89c4952d71ba25a1c8f89f62fc38075d',
+        client_id: getEnv('IG_CLIENT_ID'),
+        client_secret: getEnv('IG_CLIENT_SECRET'),
         grant_type: 'authorization_code',
-        redirect_uri: 'https://tiento-server-on-render.onrender.com/api/auth/ig',
+        redirect_uri: getEnv('BACKEND_URL') + '/api/auth/ig',
         code: req.query.code as string,
       };
 
