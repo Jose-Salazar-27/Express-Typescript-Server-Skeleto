@@ -164,6 +164,13 @@ export class AuthController {
         headers: { 'content-type': 'application/x-www-form-urlencoded' }, //make sure to set this request as url enconded
       });
 
+      // change access token to long lived access
+      const longLiveToken = await axios.get(
+        `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${data.client_secret}&access_token=${result.data.access_token}`
+      );
+
+      console.log('===== your otoken is ==== \n ' + longLiveToken.data);
+
       writeToken(result.data.access_token, next);
 
       return res.send('Token updated successfully. You can close this window');
