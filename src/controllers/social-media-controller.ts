@@ -16,9 +16,9 @@ export class SocialMediaController extends BaseController {
     this.service = _service;
   }
 
-  public getInstagramPhotos(req: Request, res: Response): void {
+  public async getInstagramPhotos(req: Request, res: Response): Promise<void> {
     try {
-      const payload = this.service.getInstagramPhotos();
+      const payload = await this.service.getInstagramPhotos();
       res.status(HttpStatusCode.Ok).json({ payload });
       // res.status(HttpStatusCode.NotImplemented).json({ msg: 'not implemented yet' });
     } catch (error) {
