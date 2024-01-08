@@ -22,9 +22,7 @@ export class SocialMediaController extends BaseController {
       res.status(HttpStatusCode.Ok).json({ payload });
       // res.status(HttpStatusCode.NotImplemented).json({ msg: 'not implemented yet' });
     } catch (error) {
-      // throw empty exception casue has default values
-      // and error type is unknow and typescript doesn't allow pass arguments to exception
-      throw new HttpException();
+      this.rejectHttpRequest(res, 400, error);
     }
   }
 

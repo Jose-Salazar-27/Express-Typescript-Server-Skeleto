@@ -15,4 +15,8 @@ export abstract class BaseController {
   public httpNotfound(res: Response, msg: string): Response {
     return res.status(HttpStatusCode.NotFound).json({ msg, data: [] });
   }
+
+  public rejectHttpRequest(res: Response, status: number, context: any): Response {
+    return res.status(status).json({ err: context });
+  }
 }
