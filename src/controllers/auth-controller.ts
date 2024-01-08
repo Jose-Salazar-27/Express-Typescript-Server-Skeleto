@@ -169,9 +169,9 @@ export class AuthController {
         `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${data.client_secret}&access_token=${result.data.access_token}`
       );
 
-      console.log('===== your otoken is ==== \n ' + JSON.stringify(longLiveToken.data));
+      // console.log('===== your otoken is ==== \n ' + JSON.stringify(longLiveToken.data));
 
-      writeToken(result.data.access_token, next);
+      writeToken(longLiveToken.data.access_token, next);
 
       return res.send('Token updated successfully. You can close this window');
     } catch (error) {
