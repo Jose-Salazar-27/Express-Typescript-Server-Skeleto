@@ -18,6 +18,7 @@ export class SocialMediaRepository {
   }
 
   public async getInstagramPhoto(token: string): Promise<AxiosResponse> {
+    console.log('token is: ', token);
     const fields = 'media_url,caption';
     return this.client.get(`graph.instagram.com/me/media?fields=${fields}&access_token=${token}`);
   }
