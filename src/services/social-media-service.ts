@@ -22,11 +22,11 @@ export class SocialMediaService {
     const result = await this.repository.getInstagramPhoto(readToken());
     console.log(result);
 
-    if (result.status !== HttpStatusCode.Ok) {
-      throw new HttpException({ code: result.status, message: result.statusText, context: result.data });
+    if (result!.status !== HttpStatusCode.Ok) {
+      throw new HttpException({ code: result!.status, message: result!.statusText, context: result!.data });
     }
 
-    return result;
+    return result?.data;
   }
 
   // I'm not sure if I should to adapt message date to current user local date. Can be do on future phases
@@ -43,7 +43,7 @@ export class SocialMediaService {
       return messages.map((msg) => {
         return {
           author: msg.author.username,
-          content: msg.content,
+          content: cutDiscordPost(msg.content),
           date: new Date(msg.timestamp).toLocaleDateString('en-US'),
           channel_name: getGuildName(msg.channel_id),
           attachment: msg.attachments,
@@ -57,3 +57,8 @@ export class SocialMediaService {
     }
   }
 }
+
+const cutDiscordPost = (post: string) => {
+  const limit = 300;
+  return post.length > limit ? post.substring(0, limit) : post;
+};
