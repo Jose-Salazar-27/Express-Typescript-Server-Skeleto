@@ -50,7 +50,8 @@ export class SocialMediaService {
             attachment: msg.attachments,
           };
         })
-        .sort((a: any, b: any) => a.date - b.date);
+        .sort((a: any, b: any) => a.date - b.date)
+        .reverse();
     } catch (error) {
       throw new HttpException({
         message: discordErrors.CANNOT_RECOVER_MESSAGES,
