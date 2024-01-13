@@ -4,7 +4,6 @@ import type { AxiosInstance, AxiosResponse } from 'axios';
 import { TYPES, buckets } from '../shared/constants';
 import { discordChannelsId } from '../shared/constants/discord';
 import axios, { HttpStatusCode } from 'axios';
-import { HttpException } from '../exceptions/custom-error';
 
 @injectable()
 export class SocialMediaRepository {
@@ -20,13 +19,14 @@ export class SocialMediaRepository {
   }
 
   public async getInstagramPhoto(token: string) {
-    try {
-      const fields = 'media_url,caption';
+    const fields = 'media_url,caption';
+    const response = await axios.get(`https://graph.instagram.com/me/media?fields=${fields}&access_token=${token}`);
 
-      return axios.get(`https://graph.instagram.com/me/media?fields=${fields}&access_token=${token}`);
-    } catch (error) {
-      throw new HttpException({ code: HttpStatusCode.ServiceUnavailable, context: { error } });
+    if (response.status !== HttpStatusCode.Ok) {
+      return [];
     }
+
+    return response.data;
   }
 
   public async getDiscordNews(limit: number = 2): Promise<any[]> {
