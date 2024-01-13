@@ -1,9 +1,7 @@
 import { inject, injectable } from 'inversify';
-import type { Request, Response } from 'express';
-import { ISocialMediaService } from '../dependency-injection';
+import type { NextFunction, Request, Response } from 'express';
 import { TYPES } from '../shared/constants';
 import { SocialMediaService } from '../services/social-media-service';
-import { HttpException } from '../exceptions/custom-error';
 import { BaseController } from './base-controller';
 import { HttpStatusCode } from 'axios';
 
@@ -16,17 +14,16 @@ export class SocialMediaController extends BaseController {
     this.service = _service;
   }
 
-  public async getInstagramPhotos(req: Request, res: Response): Promise<void> {
+  public async getInstagramPhotos(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payload = await this.service.getInstagramPhotos();
       res.status(HttpStatusCode.Ok).json({ payload });
-      // res.status(HttpStatusCode.NotImplemented).json({ msg: 'not implemented yet' });
     } catch (error) {
-      this.rejectHttpRequest(res, 400, error);
+      next(error);
     }
   }
 
-  public async getDiscordNews(req: Request, res: Response) {
+  public async getDiscordNews(req: Request, res: Response, next: NextFunction) {
     try {
       const { limit } = req.query;
       const messages = await this.service.getDiscordNews(Number(limit));
@@ -36,7 +33,7 @@ export class SocialMediaController extends BaseController {
       }
       return this.httpSuccess(res, messages);
     } catch (error) {
-      throw new HttpException();
+      next(error);
     }
   }
 }
