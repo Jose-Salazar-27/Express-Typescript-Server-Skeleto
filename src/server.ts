@@ -9,7 +9,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import bearerToken from 'express-bearer-token';
 import morgan from 'morgan';
-import ErrorHandler from './middleware/error-handler';
+import ErrorHandler, { AxiomTracking } from './middleware/error-handler';
 
 @injectable()
 export class Server extends ServerConfig implements IServer {
@@ -35,6 +35,7 @@ export class Server extends ServerConfig implements IServer {
     this.app.use(morgan('combined'));
     this.loadRoutes();
     this.app.use(ErrorHandler);
+    this.app.use(AxiomTracking);
   }
 
   public start() {
