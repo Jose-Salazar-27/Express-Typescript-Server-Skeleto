@@ -2,6 +2,9 @@ import { inject, injectable } from 'inversify';
 import { UserRepository } from '../repositories/user-repository';
 import { TYPES } from '../shared/constants/identifiers';
 import { getGuildName } from '../helpers/discord-utils';
+import { HttpError } from '../exceptions/custom-error';
+import { dataSets } from '../shared/axiom/datasets';
+import { HttpStatusCode } from 'axios';
 
 const RoleLevel = {
   tryout: 1,
@@ -23,8 +26,17 @@ export class UserService {
   public async getUserRole(username: string) {
     const response = await this.repository.findRole(username);
 
-    const role = response.data[0].roles;
-    return role;
+    const [user] = response;
+
+    if (!user) {
+      throw new HttpError({
+        code: HttpStatusCode.NotFound,
+        dataSet: dataSets.api,
+        message: 'user not found',
+      });
+    }
+
+    return user.roles;
   }
 
   async messagesByRole(requestLevel: string, userLevel: number) {

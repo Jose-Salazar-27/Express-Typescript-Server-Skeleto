@@ -1,6 +1,5 @@
 import { inject, injectable } from 'inversify';
 import { Router } from 'express';
-import { ISocialMediaController } from '../dependency-injection';
 import { TYPES } from '../shared/constants';
 import { SocialMediaController } from '../controllers/social-media-controller';
 import { verifyAuth } from '../middleware/authorizer';

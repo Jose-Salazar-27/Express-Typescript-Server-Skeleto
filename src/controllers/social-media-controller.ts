@@ -19,7 +19,7 @@ export class SocialMediaController extends BaseController {
       const payload = await this.service.getInstagramPhotos();
       res.status(HttpStatusCode.Ok).json({ payload });
     } catch (error) {
-      next(error);
+      next({ err: error, path: req.originalUrl });
     }
   }
 
@@ -33,7 +33,7 @@ export class SocialMediaController extends BaseController {
       }
       return this.httpSuccess(res, messages);
     } catch (error) {
-      next(error);
+      next({ err: error, path: req.originalUrl });
     }
   }
 }

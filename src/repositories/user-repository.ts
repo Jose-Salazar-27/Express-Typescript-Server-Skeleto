@@ -1,11 +1,9 @@
-import axios, { type AxiosInstance, type AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import { inject, injectable } from 'inversify';
-import { TDiscordUser } from '../models/discord-user-model';
+import { IDiscordUser } from '../models/discord-user-model';
 import { DiscordMessage } from '../models/discord-messages-model';
-import { RoleNames, RoleNamesIndice } from '../helpers/roles';
 import { guildId, discordChannelsId } from '../shared/constants/discord';
 import { TYPES } from '../shared/constants';
-import { getEnv } from '../helpers/getenv';
 
 @injectable()
 export class UserRepository {
@@ -14,8 +12,9 @@ export class UserRepository {
     this.httpClient = _axios;
   }
 
-  public findRole(username: string): Promise<AxiosResponse<TDiscordUser>> {
-    return this.httpClient.get(`/guilds/${guildId}/members/search?query=${username}`);
+  public async findRole(username: string): Promise<IDiscordUser[]> {
+    const user = await this.httpClient.get(`/guilds/${guildId}/members/search?query=${username}`);
+    return user.data;
   }
 
   public async messagesByRole(level: string) {

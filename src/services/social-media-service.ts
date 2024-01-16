@@ -27,13 +27,14 @@ export class SocialMediaService {
         message: 'cannot fetch ig posts',
       });
     }
+    return data;
   }
 
   // I'm not sure if I should to adapt message date to current user local date. Can be do on future phases
   public async getDiscordNews(limit: number) {
     // fetch messages from discord servers
     const rawMessages = <PromiseAllResult<AxiosResponse>[]>await this.repository.getDiscordNews(limit);
-    // clean promise wrapper an merge response arrays
+    // clean promise wrapper and merge response arrays
     const messages = rawMessages
       .filter((response) => response.status === 'fulfilled')
       .map((item) => <DiscordMessage>item.value?.data)

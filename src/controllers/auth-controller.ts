@@ -6,6 +6,8 @@ import { AuthServices } from '../services/auth-services';
 import { TYPES } from '../shared/constants';
 import { readToken, writeToken } from '../helpers/token-utils';
 import { getEnv } from '../helpers/getenv';
+import { HttpError } from '../exceptions/custom-error';
+import { dataSets } from '../shared/axiom/datasets';
 
 @injectable()
 export class AuthController {
@@ -15,28 +17,26 @@ export class AuthController {
     this.service = _service;
   }
 
-  async discord(req: Request, res: Response) {
+  async discord(req: Request, res: Response, next: NextFunction) {
     try {
       const params = this.service.stringifyDiscordParams();
       const discordOAuthUrl = `https://discord.com/api/oauth2/authorize?${params}`;
 
       res.redirect(discordOAuthUrl);
     } catch (err) {
-      res.status(HttpStatusCode.InternalServerError).json({ err });
+      next({ err, path: req.originalUrl });
     }
   }
 
-  async discordCallback(req: Request, res: Response) {
+  async discordCallback(req: Request, res: Response, next: NextFunction) {
     const code = req.query.code as string;
 
     try {
       const accessToken = await this.service.getDiscordToken(code);
       const user = await this.service.getDiscordUser(accessToken);
-
       const { id } = user;
 
       const redirectUri = this.service.getRedirectUri();
-
       const ban = await this.service.checkBan(id);
 
       if (ban) {
@@ -45,7 +45,6 @@ export class AuthController {
       }
 
       const query = await this.service.findUserById(id);
-
       const token = jwt.sign({ data: accessToken }, getEnv('JWT_KEY'), { expiresIn: '5m' });
 
       if (query.data?.length && query.data[0].verified) {
@@ -54,22 +53,22 @@ export class AuthController {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
       }
     } catch (error) {
-      res.status(HttpStatusCode.InternalServerError).json({ error });
+      next({ err: error, path: req.originalUrl });
     }
   }
 
-  async user(req: any, res: Response) {
+  async user(req: any, res: Response, next: NextFunction) {
     const token = req.token as string;
     try {
       const accessToken = jwt.verify(token, getEnv('JWT_KEY')) as { data: string };
       const user = await this.service.getDiscordUser(accessToken.data);
       res.json(user);
     } catch (error) {
-      res.status(HttpStatusCode.InternalServerError).json({ error });
+      next({ err: error, path: req.originalUrl });
     }
   }
 
-  async verifyEmail(req: Request, res: Response) {
+  async verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, discord_id: id, token, emailExist } = req.body;
       const emailStatus = await this.service.sendToken(email, id);
@@ -87,14 +86,13 @@ export class AuthController {
         });
       }
     } catch (err) {
-      res.status(HttpStatusCode.BadRequest).json({ err });
+      next({ err, path: req.originalUrl });
     }
   }
 
   async verifyCode(req: any, res: Response, next: NextFunction) {
     try {
       const { code } = req.body;
-
       const result = await this.service.validateCode(code);
 
       if (result.data?.length) {
@@ -103,13 +101,16 @@ export class AuthController {
         if (token === code && new Date().getTime() < token_expires) {
           req.payload = { token, token_expires, discord_id };
 
-          next();
+          return next();
         }
-      } else {
-        res.status(HttpStatusCode.UnprocessableEntity).json({ err: 'code in valid' });
       }
+      throw new HttpError({
+        code: HttpStatusCode.UnprocessableEntity,
+        dataSet: dataSets.http,
+        message: 'code in valid',
+      });
     } catch (err) {
-      res.status(HttpStatusCode.InternalServerError).json({ err });
+      next({ err, path: req.originalUrl });
     }
   }
 
@@ -125,16 +126,17 @@ export class AuthController {
         const insertResult = await this.service.insertUserInDiscord(token, discord_id, next);
         const isValid = Object.keys(insertResult?.data).length > 0;
 
-        if (isValid) {
-          next();
-        } else {
-          res
-            .status(HttpStatusCode.InternalServerError)
-            .json({ err: 'At this moment, we cannnot process your request' });
+        if (!isValid) {
+          throw new HttpError({
+            code: HttpStatusCode.InternalServerError,
+            dataSet: dataSets.http,
+            message: 'cannot find int discord',
+          });
         }
+        next();
       }
     } catch (err) {
-      next(err);
+      next({ err, path: req.originalUrl });
     }
   }
 
@@ -145,7 +147,7 @@ export class AuthController {
 
       res.status(HttpStatusCode.Created).json({ result });
     } catch (err) {
-      next(err);
+      next({ err, path: req.originalUrl });
     }
   }
 
@@ -168,14 +170,11 @@ export class AuthController {
       const longLiveToken = await axios.get(
         `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${data.client_secret}&access_token=${result.data.access_token}`
       );
-
-      // console.log('===== your otoken is ==== \n ' + JSON.stringify(longLiveToken.data));
-
       writeToken(longLiveToken.data.access_token, next);
 
       return res.send('Token updated successfully. You can close this window');
     } catch (error) {
-      res.send(error);
+      next({ err: error, path: req.originalUrl });
     }
   }
 }

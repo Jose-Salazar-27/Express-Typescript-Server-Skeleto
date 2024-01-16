@@ -1,6 +1,5 @@
 import { UserService } from '../services/user-services';
-import { Request, Response } from 'express';
-import { HttpException } from '../exceptions/custom-error';
+import { NextFunction, Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../shared/constants/identifiers';
 import { HttpStatusCode } from 'axios';
@@ -12,7 +11,7 @@ export class UserController {
     this.service = _service;
   }
 
-  async messagesByRole(req: Request, res: Response) {
+  async messagesByRole(req: Request, res: Response, next: NextFunction) {
     try {
       const { userLevel, level, role } = req.body;
       const result = await this.service.messagesByRole(level, userLevel);
@@ -24,19 +23,18 @@ export class UserController {
 
       res.status(HttpStatusCode.Ok).json({ result });
     } catch (err) {
-      console.log(err);
-      throw new HttpException({ context: { err } });
+      next({ err, path: req.originalUrl });
     }
   }
 
-  async getGiveAways(req: Request, res: Response) {
+  async getGiveAways(req: Request, res: Response, next: NextFunction) {
     try {
       const username = req.body.username as string;
       const role = await this.service.getUserRole(username);
-      const g = await this.service.getGiveAwayByRole(role[0]);
-      res.send(g);
+      const giveAways = await this.service.getGiveAwayByRole(role[0]);
+      res.send(giveAways);
     } catch (err) {
-      throw new HttpException({ context: { err } });
+      next({ err, path: req.originalUrl });
     }
   }
 }

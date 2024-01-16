@@ -17,15 +17,15 @@ export class AuthRouter {
   }
 
   private initRoutes(): void {
-    this.router.get('/discord', (req, res) => this.controller.discord(req, res));
-    this.router.get('/discord/callback', (req, res) => this.controller.discordCallback(req, res));
-    this.router.get('/user', (req, res) => this.controller.user(req, res));
+    this.router.get('/discord', (req, res, next) => this.controller.discord(req, res, next));
+    this.router.get('/discord/callback', (req, res, next) => this.controller.discordCallback(req, res, next));
+    this.router.get('/user', (req, res, next) => this.controller.user(req, res, next));
     this.router.get('/ig', (req, res, next) => this.controller.getInstagramToken(req, res, next));
 
     this.router.post(
       '/verify',
       (req, res, next) => VerifyValidator.useInstance().verifyBody(req, res, next),
-      (req, res) => this.controller.verifyEmail(req, res)
+      (req, res, next) => this.controller.verifyEmail(req, res, next)
     );
     this.router.put(
       '/verify-email',

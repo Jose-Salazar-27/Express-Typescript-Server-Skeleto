@@ -1,4 +1,4 @@
-import type { Response } from 'express';
+import type { NextFunction, Response } from 'express';
 import { HttpStatusCode } from 'axios';
 import { injectable } from 'inversify';
 
