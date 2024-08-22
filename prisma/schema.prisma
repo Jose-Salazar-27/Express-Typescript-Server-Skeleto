@@ -23,15 +23,16 @@ model User {
 }
 
 model DiscordUser {
-    id           String    @id
+    id           String    @id @default(uuid())
+    email        String    @unique
     createdAt    DateTime  @default(now()) @db.Timestamp(6)
-    role         String
+    role         String?
     token        String?
     tokenExpires DateTime?
     tokenCreated DateTime?
-    discordId    String
+    discordId    String    @unique
     verified     Boolean   @default(false)
-    Exp          BigInt    @default(0)
+    Exp          Int       @default(0)
 }
 
 model Message {
