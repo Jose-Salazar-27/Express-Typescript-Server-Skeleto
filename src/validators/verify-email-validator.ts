@@ -2,9 +2,11 @@ import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorMessages } from '../helpers/error-messages';
 import { ServerConfig } from '../config/server-config';
+import { prisma } from '../../prisma/prisma.client';
 
 export const verifyEmailValidator = (req: Request, res: Response, next: NextFunction) => {
-  body('email').isEmail().withMessage(ErrorMessages.Email_invalid), body('code').notEmpty().isLength({ min: 8, max: 8 }).withMessage(ErrorMessages.Email_invalid).run(req);
+  body('email').isEmail().withMessage(ErrorMessages.Email_invalid),
+    body('code').notEmpty().isLength({ min: 8, max: 8 }).withMessage(ErrorMessages.Email_invalid).run(req);
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -24,28 +26,26 @@ export class VerifyValidator extends ServerConfig {
     console.log('middleware is executing');
 
     const { email, code } = req.body;
-    const { data, error } = await this.supabaseClient.from('dicord_users').select('*').eq('email', email);
 
-    // console.log(data);
+    const user = await prisma.discordUser.findUnique({
+      where: { email: email },
+    });
 
-    if (error) {
-      console.log(error);
-      next(error);
+    // if user not exists call controller to create and record
+    if (!user) {
+      req.body.emailExist = false;
+      return next();
     }
 
-    if (data) {
-      const { verified, email: userEmail } = data[0] ?? {};
-      if (verified === true && userEmail === email) {
-        console.log('=== se cumplen las 2 ===');
-        res.status(422).json({ err: 'this email is already in use' });
-      } else if (userEmail === email) {
-        req.body.emailExist = true;
-        next();
-      } else {
-        console.log('=== NO se cumplen las 2 ===');
+    // reject request if email user is registered and verified
+    if (user.verified && user.email === email) {
+      return res.status(422).json({ err: 'this email is already in use' });
+    }
 
-        next();
-      }
+    // if email exits and request has not been rejected call controller to perform and update
+    if (user.email === email) {
+      req.body.emailExist = true;
+      return next();
     }
   }
 

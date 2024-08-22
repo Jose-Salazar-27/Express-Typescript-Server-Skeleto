@@ -8,6 +8,8 @@ import { TokenHandler } from '../middleware/token-handler';
 import { TABLES, TYPES } from '../shared/constants';
 import { discordRolesId, guildId } from '../shared/constants/discord';
 import { getEnv } from '../helpers/getenv';
+import { prisma } from '../../prisma/prisma.client';
+import { Prisma } from '@prisma/client';
 
 @injectable()
 export class AuthServices extends ServerConfig {
@@ -80,7 +82,7 @@ export class AuthServices extends ServerConfig {
   }
 
   async findUserById(userId: string) {
-    return await this.supabaseClient.from(TABLES.DISCORD_USER).select('*').eq('discord_id', userId);
+    return await prisma.discordUser.findUnique({ where: { discordId: userId } });
   }
 
   async sendToken(email: string, id: string) {
@@ -88,31 +90,41 @@ export class AuthServices extends ServerConfig {
   }
 
   async saveOne(email: string, id: string, token: any) {
-    const now = new Date();
-    const expirationDate = new Date(new Date().getTime() + 5 * 60000);
+    try {
+      const now = new Date();
+      const expirationDate = new Date(new Date().getTime() + 4 * 60000);
 
-    return await this.supabaseClient.from(TABLES.DISCORD_USER).insert([
-      {
-        discord_id: id,
+      const newUser = <Prisma.DiscordUserCreateInput>{
+        discordId: id,
         email,
         token,
-        token_created: now.getTime(),
-        token_expires: expirationDate.getTime(),
-      },
-    ]);
+        tokenCreated: now,
+        tokenExpires: expirationDate,
+      };
+
+      return await prisma.discordUser.create({
+        data: newUser,
+      });
+    } catch (error) {
+      console.log(`error while creating user: ${error}`);
+      return null;
+    }
   }
 
   async updateOne(email: string, token: string) {
     const now = new Date();
     const expirationDate = new Date(new Date().getTime() + 5 * 60000);
-    return await this.supabaseClient
-      .from(TABLES.DISCORD_USER)
-      .update({
-        token,
-        token_created: now.getTime(),
-        token_expires: expirationDate.getTime(),
-      })
-      .eq('email', email);
+
+    const updateInput = <Prisma.DiscordUserUpdateInput>{
+      token,
+      createdAt: now.getTime(),
+      tokenExpires: expirationDate.getTime(),
+    };
+
+    return await prisma.discordUser.update({
+      where: { email: email },
+      data: updateInput,
+    });
   }
 
   async insertUserInDiscord(jwt: string, id: string, next: NextFunction) {
@@ -135,32 +147,41 @@ export class AuthServices extends ServerConfig {
     }
   }
 
+  // improve this query later
   async validateCode(code: string) {
-    return await this.supabaseClient.from(TABLES.DISCORD_USER).select('*').eq('token', code);
+    try {
+      const result = await prisma.discordUser.findFirst({ where: { token: code } });
+      return result;
+    } catch (error) {
+      console.log(`validate code err: ${error}`);
+      return null;
+    }
   }
 
   async verifyUser(id: string) {
-    return await this.supabaseClient.from(TABLES.DISCORD_USER).update({ verified: true }).eq('id', id);
+    return await prisma.discordUser.update({ where: { id }, data: { verified: true } });
   }
 
   async fetchFromDiscord(userId: string) {
     try {
       const guildId = '1086689618197483540';
-      return await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
+      const response = await axios.get(`https://discord.com/api/v9/guilds/${guildId}/members/${userId}`, {
         headers: {
           Authorization: `Bot ${this.getEnvVar('BOT_TOKEN')}`,
         },
       });
+
+      return response;
     } catch (err) {
+      console.log(`fetch from discord err: ${err}`);
       return err;
     }
   }
 
   async setUserData(userRole: string, id: string) {
-    return await this.supabaseClient
-      .from(TABLES.DISCORD_USER)
-      .update({ role: userRole, verified: true })
-      .eq('discord_id', id)
-      .select();
+    return await prisma.discordUser.update({
+      where: { discordId: id },
+      data: { role: userRole, verified: true },
+    });
   }
 }

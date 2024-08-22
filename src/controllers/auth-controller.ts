@@ -44,10 +44,11 @@ export class AuthController {
         return;
       }
 
-      const query = await this.service.findUserById(id);
+      const discord_user = await this.service.findUserById(id);
       const token = jwt.sign({ data: accessToken }, getEnv('JWT_KEY'), { expiresIn: '5m' });
 
-      if (query.data?.length && query.data[0].verified) {
+      // todo: refactor this with and early return
+      if (discord_user) {
         res.redirect(redirectUri + `/dashboard?t=${token}`);
       } else {
         res.redirect(redirectUri + `/verify-email?t=${token}`);
@@ -78,6 +79,7 @@ export class AuthController {
         res.status(HttpStatusCode.Ok).json({ result: updateResult });
       } else {
         const saveStatus = await this.service.saveOne(email, id, emailStatus.code);
+        //todo add status validation
         res.status(HttpStatusCode.Ok).json({
           payload: {
             emailStatus,
@@ -86,6 +88,7 @@ export class AuthController {
         });
       }
     } catch (err) {
+      console.log(`error in verify email: ${err}`);
       next({ err, path: req.originalUrl });
     }
   }
@@ -95,15 +98,15 @@ export class AuthController {
       const { code } = req.body;
       const result = await this.service.validateCode(code);
 
-      if (result.data?.length) {
-        const { token, token_expires, discord_id } = result.data[0];
-
-        if (token === code && new Date().getTime() < token_expires) {
-          req.payload = { token, token_expires, discord_id };
-
+      if (result) {
+        const { token, tokenExpires, discordId } = result;
+        // @ts-ignore: possiby undefined
+        if (token === code && new Date().getTime() < tokenExpires.getTime()) {
+          req.payload = { token, tokenExpires, discordId, discord_id: discordId };
           return next();
         }
       }
+
       throw new HttpError({
         code: HttpStatusCode.UnprocessableEntity,
         dataSet: dataSets.http,
